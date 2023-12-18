@@ -12,6 +12,12 @@ namespace PortaPackRemoteApi
         static string PROMPT = "ch> ";
          ~PPApi() { Close(); }
 
+        //commands: help exit info systime reboot dfu hackrf sd_over_usb flash screenshot write_memory read_memory button ls rm open seek close read write
+        //to implement: info systime reboot dfu hackrf sd_over_usb flash screenshot button ls rm open seek close read write
+        //implemented: reboot dfu hackrf sd_over_usb screenshot button ls
+
+
+
         private SerialPort? _serialPort = null;
         // Events
         public event EventHandler SerialOpened;
@@ -172,112 +178,43 @@ namespace PortaPackRemoteApi
 
         public async Task<List<string>> LS(string path = "/")
         {
-            if (_serialPort == null || !_serialPort.IsOpen)
-            {
-                throw new InvalidOperationException("Serial port is not open.");
-            }
-
-            try
-            {
-                // Send the "ls " + path command
-                WriteSerial("ls " + path);
-                return await ReadStringsAsync(PROMPT);
-                //return (await ReadReply()).ToArray();
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions (e.g., timeout, port closed, etc.)
-                Console.WriteLine($"Error: {ex.Message}");
-                return new List<string>();
-            }
+            WriteSerial("ls " + path);
+            return await ReadStringsAsync(PROMPT);
         }
 
         public async Task SendButton(ButtonState btn)
         {
-            if (_serialPort == null || !_serialPort.IsOpen)
-            {
-                throw new InvalidOperationException("Serial port is not open.");
-            }
-
-            try
-            {
-                // Send the "button" command with the specified button state
-                WriteSerial($"button {(int)btn}");
-               // await ReadReply();
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions (e.g., timeout, port closed, etc.)
-                OnSerialError();
-                Console.WriteLine($"Error: {ex.Message}");
-            }
+             WriteSerial($"button {(int)btn}");
         }
 
 
         public async Task SendRestart()
         {
-            if (_serialPort == null || !_serialPort.IsOpen)
-            {
-                throw new InvalidOperationException("Serial port is not open.");
-            }
-
-            try
-            {
-                // Send the "button" command with the specified button state
-                WriteSerial("reboot");
-                OnSerialClosed();
-                //await ReadReply();
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions (e.g., timeout, port closed, etc.)
-                OnSerialError();
-                Console.WriteLine($"Error: {ex.Message}");
-            }
+            WriteSerial("reboot");
+            OnSerialClosed();  
         }
 
         public async Task SendHFMode()
         {
-            if (_serialPort == null || !_serialPort.IsOpen)
-            {
-                throw new InvalidOperationException("Serial port is not open.");
-            }
-
-            try
-            {
-                // Send the "button" command with the specified button state
-                WriteSerial("hackrf");
-                OnSerialClosed();
-                //await ReadReply();
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions (e.g., timeout, port closed, etc.)
-                OnSerialError();
-                Console.WriteLine($"Error: {ex.Message}");
-            }
+            
+            WriteSerial("hackrf");
+            OnSerialClosed();
+            
         }
 
         public async Task SendScreenshot()
         {
-            if (_serialPort == null || !_serialPort.IsOpen)
-            {
-                throw new InvalidOperationException("Serial port is not open.");
-            }
-
-            try
-            {
-                // Send the "button" command with the specified button state
-                WriteSerial("screenshot");
-               // await ReadReply();
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions (e.g., timeout, port closed, etc.)
-                OnSerialError();
-                Console.WriteLine($"Error: {ex.Message}");
-            }
+            WriteSerial("screenshot");
         }
+        public async Task SendDFU()
+        {
+            WriteSerial("dfu");
+        }
+        public async Task SendSDOUsb()
+        {
+            WriteSerial("sd_over_usb");
+        }
+
 
 
         // Event handlers

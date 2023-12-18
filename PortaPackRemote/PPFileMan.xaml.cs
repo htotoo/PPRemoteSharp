@@ -1,18 +1,7 @@
 ﻿using PortaPackRemoteApi;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace PortaPackRemote
 {
@@ -32,7 +21,11 @@ namespace PortaPackRemote
         }
         private async void RefreshPath()
         {
-            var cp = currPath;
+            Dispatcher.Invoke(() =>
+            {
+                Mouse.OverrideCursor = Cursors.Wait;
+            });
+                var cp = currPath;
             if (cp.Length>1 )
             {
                 cp = cp.TrimEnd('/');
@@ -55,6 +48,7 @@ namespace PortaPackRemote
                 dirListView.ItemsSource = dirlist;
                 
                 lblPath.Content = currPath;
+                Mouse.OverrideCursor = null;
             });
         }
 
