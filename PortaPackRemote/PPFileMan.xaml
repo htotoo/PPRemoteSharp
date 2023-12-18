@@ -13,6 +13,7 @@
         <Button x:Name="btnPwdUp" Content="Cd .." Margin="0,12,142,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="27" Click="btnPwdUp_Click" />
         <Button x:Name="btnDownload" Content="Download" HorizontalAlignment="Right" Margin="0,42,96,0" VerticalAlignment="Top" Width="73"/>
         <Button x:Name="btnUpload" Content="Upload" HorizontalAlignment="Right" Margin="0,67,96,0" VerticalAlignment="Top" Width="73"/>
+        <Button x:Name="btnDel" Content="Delete" Margin="0,92,96,0" VerticalAlignment="Top" ToolTip="Delete the selected FILE" Click="btnDel_Click" HorizontalAlignment="Right" Width="73"/>
 
     </Grid>
 </Window>

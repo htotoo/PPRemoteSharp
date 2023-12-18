@@ -187,6 +187,12 @@ namespace PortaPackRemoteApi
              WriteSerial($"button {(int)btn}");
         }
 
+        public async Task SendFileDel(string file)
+        {
+            //WriteSerial("rm " + file);
+            //await ReadStringsAsync("ok");
+            throw new NotImplementedException();
+        }
 
         public async Task SendRestart()
         {
@@ -196,10 +202,8 @@ namespace PortaPackRemoteApi
 
         public async Task SendHFMode()
         {
-            
             WriteSerial("hackrf");
-            OnSerialClosed();
-            
+            OnSerialClosed();   
         }
 
         public async Task SendScreenshot()

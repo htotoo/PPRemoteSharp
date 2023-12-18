@@ -89,5 +89,27 @@ namespace PortaPackRemote
             currPath = CdUp(currPath);
             RefreshPath();
         }
+
+        private async void btnDel_Click(object sender, RoutedEventArgs e)
+        {
+            if (dirListView.SelectedItem != null)
+            {
+                var sel = (string)dirListView.SelectedItem;
+                if (sel.EndsWith("/") || sel == "..")
+                {
+                    MessageBox.Show("Only files can be deleted.");
+                }
+                else
+                {
+                    var file = currPath + sel;
+                    var res =  MessageBox.Show("Are you sure you wanna delete \n" + file + " ?","Delete file", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (res == MessageBoxResult.Yes)
+                    {
+                        await _api.SendFileDel(file);
+                        RefreshPath() ;
+                    }
+                }
+            }
+        }
     }
 }

@@ -24,6 +24,12 @@ namespace PortaPackRemote
             listSerials.ItemsSource = api.GetPorts();
             api.SerialOpened += Api_SerialOpened;
             api.SerialClosed += Api_SerialClosed;
+            api.SerialError += Api_SerialError;
+        }
+
+        private void Api_SerialError(object? sender, EventArgs e)
+        {
+            Api_SerialClosed(sender, e);
         }
 
         private void Api_SerialClosed(object? sender, EventArgs e)
@@ -115,15 +121,17 @@ namespace PortaPackRemote
         {
             if (e.Delta < 0) { api.SendButton(PPApi.ButtonState.BUTTON_ROTRIGHT);}
             if (e.Delta > 0) { api.SendButton(PPApi.ButtonState.BUTTON_ROTLEFT); }
+            e.Handled = true;
         }
 
         private void screen_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter) { api.SendButton(PPApi.ButtonState.BUTTON_ENTER);}
-            if (e.Key == Key.Left) { api.SendButton(PPApi.ButtonState.BUTTON_LEFT); }
-            if (e.Key == Key.Right) { api.SendButton(PPApi.ButtonState.BUTTON_RIGHT); }
-            if (e.Key == Key.Up) { api.SendButton(PPApi.ButtonState.BUTTON_UP); }
-            if (e.Key == Key.Down) { api.SendButton(PPApi.ButtonState.BUTTON_DOWN); }
+            if (e.Key == Key.Enter) { api.SendButton(PPApi.ButtonState.BUTTON_ENTER); e.Handled = true; }
+            if (e.Key == Key.Left) { api.SendButton(PPApi.ButtonState.BUTTON_LEFT); e.Handled = true; }
+            if (e.Key == Key.Right) { api.SendButton(PPApi.ButtonState.BUTTON_RIGHT); e.Handled = true; }
+            if (e.Key == Key.Up) { api.SendButton(PPApi.ButtonState.BUTTON_UP); e.Handled = true; }
+            if (e.Key == Key.Down) { api.SendButton(PPApi.ButtonState.BUTTON_DOWN); e.Handled = true; }
+            
         }
 
         private async void btnFileMan_Click(object sender, RoutedEventArgs e)
