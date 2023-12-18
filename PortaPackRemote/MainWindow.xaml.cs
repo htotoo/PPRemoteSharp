@@ -145,11 +145,24 @@ namespace PortaPackRemote
         {
             listSerials.ItemsSource = api.GetPorts();
         }
-
+        private static System.IO.Stream ConvertBitmapToMemoryStream(System.Drawing.Bitmap bitmap)
+        {
+            System.IO.MemoryStream stream = new System.IO.MemoryStream();
+            bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+            stream.Position = 0;
+            return stream;
+        }
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             /*string[] asd = (await api.ReadReply()).ToArray();
             Console.WriteLine(asd[0]);*/
+            var bmp = await api.SendScreenFrame();
+            BitmapImage bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.StreamSource = ConvertBitmapToMemoryStream(bmp);
+            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+            bitmapImage.EndInit();
+            screen.Source = bitmapImage;
 
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO.Ports;
 using System.Text;
 using System.Threading.Tasks;
@@ -192,6 +193,37 @@ namespace PortaPackRemoteApi
             //WriteSerial("rm " + file);
             //await ReadStringsAsync("ok");
             throw new NotImplementedException();
+        }
+
+        public async Task<Bitmap> SendScreenFrame()
+        {
+            Bitmap bmp = new Bitmap(241, 321);
+            
+            WriteSerial("screenframe");
+            var lines = await ReadStringsAsync("ok");
+            int y = -1;
+            foreach(string line in lines)
+            {
+                y++;
+                int x = -1;
+                if (line.StartsWith("screenframe")) continue;
+                for (int o = 0; o < line.Length; o+=6)
+                {
+                    x++;
+                    try
+                    {
+                        var r = Convert.ToByte(line.Substring(o, 2), 16);
+                        var g = Convert.ToByte(line.Substring(o + 2, 2), 16);
+                        var b = Convert.ToByte(line.Substring(o + 4, 2), 16);
+                        bmp.SetPixel(x, y, Color.FromArgb(r, g, b));
+                    }
+                    catch {
+                        var oo = 1;
+                        oo++;
+                    }
+                }                
+            }
+            return bmp;
         }
 
         public async Task SendRestart()
