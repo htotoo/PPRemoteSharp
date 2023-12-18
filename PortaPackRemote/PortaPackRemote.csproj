@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="SCR_0006.PNG" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PortaPackRemoteApi\PortaPackRemoteApi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="SCR_0006.PNG">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+</Project>

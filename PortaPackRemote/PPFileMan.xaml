@@ -1,0 +1,18 @@
+﻿<Window x:Class="PortaPackRemote.PPFileMan"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PortaPackRemote"
+        mc:Ignorable="d"
+        Title="PPFileMan" Height="450" Width="535">
+    <Grid>
+        <ListBox x:Name="dirListView" MouseDoubleClick="ListView_MouseDoubleClick" Margin="10,40,187,40"/>
+        <Label Content="Path:" HorizontalAlignment="Left" Margin="10,9,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.406,0.142"/>
+        <Label x:Name="lblPath" Content="/" HorizontalAlignment="Left" Margin="51,6,0,0" VerticalAlignment="Top" Width="207"/>
+        <Button x:Name="btnPwdUp" Content="Cd .." Margin="0,12,142,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="27" Click="btnPwdUp_Click" />
+        <Button x:Name="btnDownload" Content="Download" HorizontalAlignment="Right" Margin="0,42,96,0" VerticalAlignment="Top" Width="73"/>
+        <Button x:Name="btnUpload" Content="Upload" HorizontalAlignment="Right" Margin="0,67,96,0" VerticalAlignment="Top" Width="73"/>
+
+    </Grid>
+</Window>
