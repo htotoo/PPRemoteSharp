@@ -279,6 +279,71 @@ namespace PortaPackRemoteApi
             return bmp;
         }
 
+        public async Task DownloadFile(string src, string dst)
+        {
+            WriteSerial("filesize " + src);
+            var lines = await ReadStringsAsync(PROMPT);
+            if (lines.Last() != "ok")
+            {
+                throw new Exception("Error downloading (size) file");
+            }
+            int size = int.Parse(lines[lines.Count-2]);
+            WriteSerial("open " + src);
+            lines = await ReadStringsAsync(PROMPT);
+            if (lines.Last() != "ok" && lines.Last() != "file already open")
+            {
+                throw new Exception("Error downloading (open) file");
+            }
+            WriteSerial("seek 0");
+            lines = await ReadStringsAsync(PROMPT);
+            if (lines.Last() != "ok")
+            {
+                throw new Exception("Error downloading (seek) file");
+            }
+            WriteSerial("read " + size.ToString());
+            lines = await ReadStringsAsync(PROMPT);
+            var o = lines.Last();
+            if (o !="ok")
+            {
+                throw new Exception("Error downloading (data) file");
+            }
+            //parse and save!
+            var dFile = File.OpenWrite(dst);
+            for(int i = 0; i<lines.Count - 1; i++)
+            {
+                var bArr = ParseHexToByte(lines[i].ToUpper());
+                dFile.Write(bArr);
+            }
+            dFile.Close();           
+
+        }
+
+        private byte[] ParseHexToByte(string v)
+        {
+            // Remove any spaces or non-hex characters from the input string
+            string hexString = "";
+            foreach (char c in v)
+            {
+                if (Uri.IsHexDigit(c))
+                {
+                    hexString += c;
+                }
+            }
+            // Check if the length of the hex string is odd, and pad with a leading zero if necessary
+            if (hexString.Length % 2 != 0)
+            {
+                hexString = "0" + hexString;
+            }
+            // Convert the hex string to a byte array
+            byte[] byteArray = new byte[hexString.Length / 2];
+            for (int i = 0; i < hexString.Length; i += 2)
+            {
+                byteArray[i / 2] = Convert.ToByte(hexString.Substring(i, 2), 16);
+            }
+
+            return byteArray;
+        }
+
         public async Task SendRestart()
         {
             WriteSerial("reboot");

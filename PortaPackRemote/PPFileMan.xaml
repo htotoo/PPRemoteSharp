@@ -11,7 +11,7 @@
         <Label Content="Path:" HorizontalAlignment="Left" Margin="10,9,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.406,0.142"/>
         <Label x:Name="lblPath" Content="/" HorizontalAlignment="Left" Margin="51,6,0,0" VerticalAlignment="Top" Width="207"/>
         <Button x:Name="btnPwdUp" Content="Cd .." Margin="0,12,142,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="27" Click="btnPwdUp_Click" />
-        <Button x:Name="btnDownload" Content="Download" HorizontalAlignment="Right" Margin="0,42,96,0" VerticalAlignment="Top" Width="73"/>
+        <Button x:Name="btnDownload" Content="Download" HorizontalAlignment="Right" Margin="0,42,96,0" VerticalAlignment="Top" Width="73" Click="btnDownload_Click"/>
         <Button x:Name="btnUpload" Content="Upload" HorizontalAlignment="Right" Margin="0,67,96,0" VerticalAlignment="Top" Width="73"/>
         <Button x:Name="btnDel" Content="Delete" Margin="0,92,96,0" VerticalAlignment="Top" ToolTip="Delete the selected FILE" Click="btnDel_Click" HorizontalAlignment="Right" Width="73"/>
 

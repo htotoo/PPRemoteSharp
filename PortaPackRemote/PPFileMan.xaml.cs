@@ -1,4 +1,5 @@
-﻿using PortaPackRemoteApi;
+﻿using Microsoft.Win32;
+using PortaPackRemoteApi;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
@@ -110,6 +111,29 @@ namespace PortaPackRemote
                     }
                 }
             }
+        }
+
+        private async void btnDownload_Click(object sender, RoutedEventArgs e)
+        {
+            if (dirListView.SelectedItem == null) return;
+            var sel = (string)dirListView.SelectedItem;
+            if (sel.EndsWith("/") || sel == "..")
+            {
+                MessageBox.Show("Only files can be deleted.");
+                return;
+            }
+            FileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.FileName =  sel;   
+            bool? result = saveFileDialog.ShowDialog();
+            if ( result != null && result==true)
+            {
+                string src = currPath + sel;
+                string dst = saveFileDialog.FileName;
+                Mouse.OverrideCursor = Cursors.Wait;
+                await _api.DownloadFile(src, dst);
+                Mouse.OverrideCursor = null;
+            }
+
         }
     }
 }
