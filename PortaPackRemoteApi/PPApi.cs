@@ -195,11 +195,11 @@ namespace PortaPackRemoteApi
             throw new NotImplementedException();
         }
 
-        public async Task<Bitmap> SendScreenFrame()
+        public async Task<Bitmap> SendScreenFrameShort()
         {
             Bitmap bmp = new Bitmap(241, 321);
             
-            WriteSerial("screenframe");
+            WriteSerial("screenframeshort");
             var lines = await ReadStringsAsync("ok");
             int y = -1;
             foreach(string line in lines)
@@ -207,21 +207,58 @@ namespace PortaPackRemoteApi
                 y++;
                 int x = -1;
                 if (line.StartsWith("screenframe")) continue;
-                for (int o = 0; o < line.Length; o+=6)
+                for (int o = 0; o < line.Length; o+=1)
+                {
+                    x++;
+                    if (x >= 240) break;
+                    try
+                    {
+                        byte[] bys = Encoding.ASCII.GetBytes(line.Substring(o, 1));
+                        byte by =(byte) (bys[0] - 32);
+                        // -  R   G  B 
+                        // 00 11 11 11
+                        byte r = (byte)(by >> 4 << 6);
+                        byte g = (byte)(by >> 2 << 6);
+                        byte b = (byte)(by << 6);
+                        bmp.SetPixel(x, y, Color.FromArgb(r, g, b));
+                    }
+                    catch (Exception e){
+                        var oo = 1;
+                        oo+=line.Length;
+                    }
+                }                
+            }
+            return bmp;
+        }
+
+        public async Task<Bitmap> SendScreenFrame()
+        {
+            Bitmap bmp = new Bitmap(241, 321);
+
+            WriteSerial("screenframeshort");
+            var lines = await ReadStringsAsync("ok");
+            int y = -1;
+            foreach (string line in lines)
+            {
+                y++;
+                int x = -1;
+                if (line.StartsWith("screenframe")) continue;
+                for (int o = 0; o < line.Length; o += 6)
                 {
                     x++;
                     try
                     {
-                        var r = Convert.ToByte(line.Substring(o, 2), 16);
-                        var g = Convert.ToByte(line.Substring(o + 2, 2), 16);
-                        var b = Convert.ToByte(line.Substring(o + 4, 2), 16);
+                        var r = Convert.ToByte(line.Substring(o, 2), 16) ;
+                        var g = Convert.ToByte(line.Substring(o + 2, 2), 16) ;
+                        var b = Convert.ToByte(line.Substring(o + 4, 2), 16) ;
                         bmp.SetPixel(x, y, Color.FromArgb(r, g, b));
                     }
-                    catch {
+                    catch
+                    {
                         var oo = 1;
                         oo++;
                     }
-                }                
+                }
             }
             return bmp;
         }

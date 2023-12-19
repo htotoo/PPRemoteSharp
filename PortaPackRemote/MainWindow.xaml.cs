@@ -156,7 +156,7 @@ namespace PortaPackRemote
         {
             /*string[] asd = (await api.ReadReply()).ToArray();
             Console.WriteLine(asd[0]);*/
-            var bmp = await api.SendScreenFrame();
+            var bmp = await api.SendScreenFrameShort();
             BitmapImage bitmapImage = new BitmapImage();
             bitmapImage.BeginInit();
             bitmapImage.StreamSource = ConvertBitmapToMemoryStream(bmp);
