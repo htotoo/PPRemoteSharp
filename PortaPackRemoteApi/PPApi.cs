@@ -17,7 +17,7 @@ namespace PortaPackRemoteApi
         //to implement: info systime reboot dfu hackrf sd_over_usb flash screenshot button ls rm open seek close read write
         //implemented: reboot dfu hackrf sd_over_usb screenshot button ls
 
-
+        //todo detect serial port error / close / disappear
 
         private SerialPort? _serialPort = null;
         // Events
@@ -31,6 +31,7 @@ namespace PortaPackRemoteApi
         private string dataInBuffer = "";
         private List<string> lastLines = new List<string>();
         private bool isWaitingForReply = false;
+
         public enum ButtonState
         {
             BUTTON_RIGHT = 1,
@@ -65,12 +66,24 @@ namespace PortaPackRemoteApi
             _serialPort.ErrorReceived += _serialPort_ErrorReceived;
             _serialPort.DataReceived += _serialPort_DataReceived;
 
-            await Task.Run(() => { _serialPort.Open(); _serialPort.DiscardInBuffer();  OnSerialOpened(); }  ) ;
+            await Task.Run(() => {
+                try
+                {
+                    _serialPort.Open();
+                    _serialPort.DiscardInBuffer();
+                    OnSerialOpened();
+                }
+                catch { OnSerialError(); }
+            }  ) ;
         }
 
         private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             int bytes = _serialPort.BytesToRead;
+            if (bytes <=0)
+            {
+                OnSerialError();
+            }
             byte[] buffer = new byte[bytes];
             _serialPort.Read(buffer, 0, bytes);
             string sajt = Encoding.UTF8.GetString(buffer, 0, bytes );
@@ -100,6 +113,7 @@ namespace PortaPackRemoteApi
                 }
             }
             lineEvent.Set();
+            OnLine?.Invoke(this,line);
             Trace.WriteLine(line);
         }
         private async Task<List<string>> ReadStringsAsync(string endMarker)
@@ -109,7 +123,8 @@ namespace PortaPackRemoteApi
             List<string> myLines = new List<string>();
             while (true)
             {
-                lineEvent.Wait(10000);
+                //lineEvent.Wait(10000);
+                await Task.Run(() => lineEvent.Wait(10000));
                 if (!lineEvent.IsSet)
                 {
                     lineEvent.Reset();
@@ -154,7 +169,7 @@ namespace PortaPackRemoteApi
 
 
 
-        public bool WriteSerial(string line) //todo use it from everywhere
+        public bool WriteSerial(string line) 
         {
             try
             {
@@ -185,7 +200,8 @@ namespace PortaPackRemoteApi
 
         public async Task SendButton(ButtonState btn)
         {
-             WriteSerial($"button {(int)btn}");
+            WriteSerial($"button {(int)btn}");
+            await ReadStringsAsync(PROMPT);
         }
 
         public async Task SendFileDel(string file)
@@ -195,11 +211,11 @@ namespace PortaPackRemoteApi
             throw new NotImplementedException();
         }
 
-        public async Task<Bitmap> SendScreenFrame()
+        public async Task<Bitmap> SendScreenFrameShort()
         {
             Bitmap bmp = new Bitmap(241, 321);
             
-            WriteSerial("screenframe");
+            WriteSerial("screenframeshort");
             var lines = await ReadStringsAsync("ok");
             int y = -1;
             foreach(string line in lines)
@@ -207,21 +223,58 @@ namespace PortaPackRemoteApi
                 y++;
                 int x = -1;
                 if (line.StartsWith("screenframe")) continue;
-                for (int o = 0; o < line.Length; o+=6)
+                for (int o = 0; o < line.Length; o+=1)
+                {
+                    x++;
+                    if (x >= 240) break;
+                    try
+                    {
+                        byte[] bys = Encoding.ASCII.GetBytes(line.Substring(o, 1));
+                        byte by =(byte) (bys[0] - 32);
+                        // -  R   G  B 
+                        // 00 11 11 11
+                        byte r = (byte)(by >> 4 << 6);
+                        byte g = (byte)(by >> 2 << 6);
+                        byte b = (byte)(by << 6);
+                        bmp.SetPixel(x, y, Color.FromArgb(r, g, b));
+                    }
+                    catch (Exception e){
+                        var oo = 1;
+                        oo+=line.Length;
+                    }
+                }                
+            }
+            return bmp;
+        }
+
+        public async Task<Bitmap> SendScreenFrame()
+        {
+            Bitmap bmp = new Bitmap(241, 321);
+
+            WriteSerial("screenframeshort");
+            var lines = await ReadStringsAsync("ok");
+            int y = -1;
+            foreach (string line in lines)
+            {
+                y++;
+                int x = -1;
+                if (line.StartsWith("screenframe")) continue;
+                for (int o = 0; o < line.Length; o += 6)
                 {
                     x++;
                     try
                     {
-                        var r = Convert.ToByte(line.Substring(o, 2), 16);
-                        var g = Convert.ToByte(line.Substring(o + 2, 2), 16);
-                        var b = Convert.ToByte(line.Substring(o + 4, 2), 16);
+                        var r = Convert.ToByte(line.Substring(o, 2), 16) ;
+                        var g = Convert.ToByte(line.Substring(o + 2, 2), 16) ;
+                        var b = Convert.ToByte(line.Substring(o + 4, 2), 16) ;
                         bmp.SetPixel(x, y, Color.FromArgb(r, g, b));
                     }
-                    catch {
+                    catch
+                    {
                         var oo = 1;
                         oo++;
                     }
-                }                
+                }
             }
             return bmp;
         }
@@ -241,14 +294,17 @@ namespace PortaPackRemoteApi
         public async Task SendScreenshot()
         {
             WriteSerial("screenshot");
+            await ReadStringsAsync(PROMPT);
         }
         public async Task SendDFU()
         {
             WriteSerial("dfu");
+            OnSerialClosed();  
         }
         public async Task SendSDOUsb()
         {
             WriteSerial("sd_over_usb");
+            OnSerialClosed();  
         }
 
 

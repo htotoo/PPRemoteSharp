@@ -21,7 +21,7 @@
         </Button>
         <Button x:Name="btnLeft" Content="&lt;" HorizontalAlignment="Left" Margin="273,80,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold"  Width="20" Height="30" Click="btnLeft_Click"/>
         <Button x:Name="btnEnter" Content="O" HorizontalAlignment="Left" Margin="300,80,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" Width="20" Height="30" Click="btnEnter_Click"/>
-        <Image x:Name="screen" Margin="10,42,0,0" Source="/SCR_0006.PNG" Stretch="None" HorizontalAlignment="Left" Width="248" Height="326" VerticalAlignment="Top" MouseUp="screen_MouseUp" MouseWheel="screen_MouseWheel" Focusable="True"/>
+        <Image x:Name="screen" Margin="10,42,0,0" Stretch="None" HorizontalAlignment="Left" Width="248" Height="326" VerticalAlignment="Top" MouseUp="screen_MouseUp" MouseWheel="screen_MouseWheel" Focusable="True"/>
         <ComboBox x:Name="listSerials" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="0"/>
         <Button x:Name="btnConnDisconn" Content="Connect" HorizontalAlignment="Left" Margin="144,10,0,0" VerticalAlignment="Top" Click="btnConnDisconn_Click"/>
         <Button x:Name="btnFileMan" Content="File manager" HorizontalAlignment="Left" Margin="274,238,0,0" VerticalAlignment="Top" Click="btnFileMan_Click"/>
@@ -31,7 +31,8 @@
         <Button x:Name="btnRotLeft" Content="↺" HorizontalAlignment="Left" Margin="338,150,0,0" VerticalAlignment="Top" Click="btnRotLeft_Click"/>
         <Button x:Name="btnScreenshot" Content="Screenshot" HorizontalAlignment="Left" Margin="274,193,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.237,0.119" Width="72" Click="btnScreenshot_Click"/>
         <Button x:Name="btnPortRefresh" Content="Refresh" HorizontalAlignment="Left" Margin="215,10,0,0" VerticalAlignment="Top" Click="btnPortRefresh_Click"/>
-        <Button Content="Button" HorizontalAlignment="Left" Margin="300,362,0,0" VerticalAlignment="Top" Click="Button_Click"/>
+        <Button x:Name="btnRefreshScreen" Content="Refresh" HorizontalAlignment="Left" Margin="10,367,0,0" VerticalAlignment="Top" Click="Button_Click"/>
+        <CheckBox x:Name="chkAutoRefresh" Content="Auto refresh after click" HorizontalAlignment="Left" Margin="70,369,0,0" VerticalAlignment="Top" IsChecked="True"/>
 
     </Grid>
 </Window>

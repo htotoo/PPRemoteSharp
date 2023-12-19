@@ -1,19 +1,11 @@
 ﻿using PortaPackRemoteApi;
-using System.Diagnostics;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace PortaPackRemote
 {
- 
+
     public partial class MainWindow : Window
     {
         PPApi api = new PPApi();
@@ -48,7 +40,7 @@ namespace PortaPackRemote
             });
         }
 
-        private void btnConnDisconn_Click(object sender, RoutedEventArgs e)
+        private async void btnConnDisconn_Click(object sender, RoutedEventArgs e)
         {
             if (api.IsConnected()) { 
                 api.Close(); 
@@ -57,44 +49,60 @@ namespace PortaPackRemote
             {
                 if (listSerials.SelectedIndex != -1)
                 {
-                    api.OpenPort(listSerials.Text);
+                    await api.OpenPort(listSerials.Text);
+                    await RefreshScreen();
                 }
             }
         }
 
-        private void btnUp_Click(object sender, RoutedEventArgs e)
+        private async Task DoAutoRefresh()
         {
-            api.SendButton(PPApi.ButtonState.BUTTON_UP);
+            if (chkAutoRefresh.IsChecked == true)
+            {
+                await RefreshScreen();
+            }
         }
 
-        private void btnRight_Click(object sender, RoutedEventArgs e)
+        private async void btnUp_Click(object sender, RoutedEventArgs e)
         {
-            api.SendButton(PPApi.ButtonState.BUTTON_RIGHT);
+            await api.SendButton(PPApi.ButtonState.BUTTON_UP);
+            await DoAutoRefresh();
         }
 
-        private void btnDown_Click(object sender, RoutedEventArgs e)
+        private async void btnRight_Click(object sender, RoutedEventArgs e)
         {
-            api.SendButton(PPApi.ButtonState.BUTTON_DOWN);
+            await api.SendButton(PPApi.ButtonState.BUTTON_RIGHT);
+            await DoAutoRefresh();
         }
 
-        private void btnLeft_Click(object sender, RoutedEventArgs e)
+        private async void btnDown_Click(object sender, RoutedEventArgs e)
         {
-            api.SendButton(PPApi.ButtonState.BUTTON_LEFT);
+            await api.SendButton(PPApi.ButtonState.BUTTON_DOWN);
+            await DoAutoRefresh();
         }
 
-        private void btnEnter_Click(object sender, RoutedEventArgs e)
+        private async void btnLeft_Click(object sender, RoutedEventArgs e)
         {
-            api.SendButton(PPApi.ButtonState.BUTTON_ENTER);
+            await api.SendButton(PPApi.ButtonState.BUTTON_LEFT);
+            await DoAutoRefresh();
         }
 
-        private void btnRotLeft_Click(object sender, RoutedEventArgs e)
+        private async void btnEnter_Click(object sender, RoutedEventArgs e)
         {
-            api.SendButton(PPApi.ButtonState.BUTTON_ROTLEFT);
+            await api.SendButton(PPApi.ButtonState.BUTTON_ENTER);
+            await DoAutoRefresh();
         }
 
-        private void btnRotRight_Click(object sender, RoutedEventArgs e)
+        private async void btnRotLeft_Click(object sender, RoutedEventArgs e)
         {
-            api.SendButton(PPApi.ButtonState.BUTTON_ROTRIGHT);
+            await api.SendButton(PPApi.ButtonState.BUTTON_ROTLEFT);
+            await DoAutoRefresh();
+        }
+
+        private async void btnRotRight_Click(object sender, RoutedEventArgs e)
+        {
+            await api.SendButton(PPApi.ButtonState.BUTTON_ROTRIGHT);
+            await DoAutoRefresh();
         }
 
         private void btnRestart_Click(object sender, RoutedEventArgs e)
@@ -107,9 +115,9 @@ namespace PortaPackRemote
             api.SendHFMode();
         }
 
-        private void btnScreenshot_Click(object sender, RoutedEventArgs e)
+        private async void btnScreenshot_Click(object sender, RoutedEventArgs e)
         {
-            api.SendScreenshot();
+            await api.SendScreenshot();
         }
 
         private void screen_MouseUp(object sender, MouseButtonEventArgs e)
@@ -117,34 +125,39 @@ namespace PortaPackRemote
             //send click
         }
 
-        private void screen_MouseWheel(object sender, MouseWheelEventArgs e)
+        private async void screen_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (e.Delta < 0) { api.SendButton(PPApi.ButtonState.BUTTON_ROTRIGHT);}
-            if (e.Delta > 0) { api.SendButton(PPApi.ButtonState.BUTTON_ROTLEFT); }
+            if (e.Delta < 0) { await api.SendButton(PPApi.ButtonState.BUTTON_ROTRIGHT);  }
+            if (e.Delta > 0) { await api.SendButton(PPApi.ButtonState.BUTTON_ROTLEFT);  }
             e.Handled = true;
+            await DoAutoRefresh();
         }
 
-        private void screen_KeyUp(object sender, KeyEventArgs e)
+        private async void screen_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter) { api.SendButton(PPApi.ButtonState.BUTTON_ENTER); e.Handled = true; }
-            if (e.Key == Key.Left) { api.SendButton(PPApi.ButtonState.BUTTON_LEFT); e.Handled = true; }
-            if (e.Key == Key.Right) { api.SendButton(PPApi.ButtonState.BUTTON_RIGHT); e.Handled = true; }
-            if (e.Key == Key.Up) { api.SendButton(PPApi.ButtonState.BUTTON_UP); e.Handled = true; }
-            if (e.Key == Key.Down) { api.SendButton(PPApi.ButtonState.BUTTON_DOWN); e.Handled = true; }
+            if (e.Key == Key.Enter) { await api.SendButton(PPApi.ButtonState.BUTTON_ENTER); e.Handled = true; }
+            if (e.Key == Key.Left) { await api.SendButton(PPApi.ButtonState.BUTTON_LEFT); e.Handled = true; }
+            if (e.Key == Key.Right) { await api.SendButton(PPApi.ButtonState.BUTTON_RIGHT); e.Handled = true; }
+            if (e.Key == Key.Up) { await api.SendButton(PPApi.ButtonState.BUTTON_UP); e.Handled = true; }
+            if (e.Key == Key.Down) { await api.SendButton(PPApi.ButtonState.BUTTON_DOWN); e.Handled = true; }
+
+            if (e.Handled) { await DoAutoRefresh(); }
             
         }
 
         private async void btnFileMan_Click(object sender, RoutedEventArgs e)
         {
             var browser = new PPFileMan(api);
-            browser.ShowDialog();
-            
+            this.Hide();
+            browser.ShowDialog();            
+            this.Show();
         }
 
         private void btnPortRefresh_Click(object sender, RoutedEventArgs e)
         {
             listSerials.ItemsSource = api.GetPorts();
         }
+
         private static System.IO.Stream ConvertBitmapToMemoryStream(System.Drawing.Bitmap bitmap)
         {
             System.IO.MemoryStream stream = new System.IO.MemoryStream();
@@ -152,18 +165,22 @@ namespace PortaPackRemote
             stream.Position = 0;
             return stream;
         }
-        private async void Button_Click(object sender, RoutedEventArgs e)
+
+        private async Task RefreshScreen()
         {
-            /*string[] asd = (await api.ReadReply()).ToArray();
-            Console.WriteLine(asd[0]);*/
-            var bmp = await api.SendScreenFrame();
+            Dispatcher.Invoke(() =>  {  Mouse.OverrideCursor = Cursors.Wait; });
+            var bmp = await api.SendScreenFrameShort();
             BitmapImage bitmapImage = new BitmapImage();
             bitmapImage.BeginInit();
             bitmapImage.StreamSource = ConvertBitmapToMemoryStream(bmp);
             bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
             bitmapImage.EndInit();
-            screen.Source = bitmapImage;
+            await Dispatcher.InvokeAsync(() => { screen.Source = bitmapImage; Mouse.OverrideCursor = null; });
+        }
 
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            await RefreshScreen();
         }
     }
 }
