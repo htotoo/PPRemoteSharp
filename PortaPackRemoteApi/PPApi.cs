@@ -181,8 +181,18 @@ namespace PortaPackRemoteApi
                 {
                     line = line + "\n\r";
                 }
-                byte[] byteArray = Encoding.UTF8.GetBytes(line);
-                _serialPort.Write(byteArray, 0, byteArray.Length);
+                int chunkSize = 32;
+                // Send data in chunks
+                for (int i = 0; i < line.Length; i += chunkSize)
+                {
+                    int remainingBytes = Math.Min(chunkSize, line.Length - i);
+                    string chunk = line.Substring(i, remainingBytes);
+                    byte[] byteArray = Encoding.UTF8.GetBytes(chunk);
+                    _serialPort.Write(byteArray, 0, byteArray.Length);
+                    // Flush the serial port
+                    _serialPort.BaseStream.Flush();
+                }
+               
                 return true;
             }
             catch (Exception ex) { 
@@ -300,20 +310,32 @@ namespace PortaPackRemoteApi
             {
                 throw new Exception("Error downloading (seek) file");
             }
-            WriteSerial("read " + size.ToString());
-            lines = await ReadStringsAsync(PROMPT);
-            var o = lines.Last();
-            if (o !="ok")
-            {
-                throw new Exception("Error downloading (data) file");
-            }
-            //parse and save!
             var dFile = File.OpenWrite(dst);
-            for(int i = 0; i<lines.Count - 1; i++)
+            int rem = size;
+            int chunk = 16 * 5;
+            while (rem > 0)
             {
-                var bArr = ParseHexToByte(lines[i].ToUpper());
-                dFile.Write(bArr);
+                if (rem<chunk) { chunk = rem; }
+                WriteSerial("read " + chunk.ToString());
+                lines = await ReadStringsAsync(PROMPT);
+                var o = lines.Last();
+               
+                if (o != "ok")
+                {
+                    WriteSerial("close");
+                    dFile.Close();
+                    throw new Exception("Error downloading (data) file");
+                }
+                //parse and save!
+
+                for (int i = 0; i < lines.Count - 1; i++)
+                {
+                    var bArr = ParseHexToByte(lines[i].ToUpper());
+                    rem -= bArr.Length;
+                    dFile.Write(bArr);
+                }
             }
+            WriteSerial("close");
             dFile.Close();           
 
         }
