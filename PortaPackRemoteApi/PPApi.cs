@@ -318,6 +318,7 @@ namespace PortaPackRemoteApi
                 if (rem<chunk) { chunk = rem; }
                 WriteSerial("read " + chunk.ToString());
                 lines = await ReadStringsAsync(PROMPT);
+                lines = lines.Skip(1).ToList();
                 var o = lines.Last();
                
                 if (o != "ok")
