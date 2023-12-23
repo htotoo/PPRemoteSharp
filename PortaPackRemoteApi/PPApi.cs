@@ -230,6 +230,7 @@ namespace PortaPackRemoteApi
             WriteSerial("screenframeshort");
             var lines = await ReadStringsAsync("ok");
             int y = -1;
+            throw new Exception("kjh");
             foreach(string line in lines)
             {
                 y++;
@@ -387,7 +388,9 @@ namespace PortaPackRemoteApi
 
         public async Task SendScreenshot()
         {
+            throw  new NotImplementedException();
             WriteSerial("screenshot");
+
             await ReadStringsAsync(PROMPT);
         }
         public async Task SendDFU()

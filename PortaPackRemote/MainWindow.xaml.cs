@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace PortaPackRemote
 {
@@ -63,94 +64,121 @@ namespace PortaPackRemote
             }
         }
 
+        private async Task SendKeyStroke(PPApi.ButtonState state)
+        {
+            try
+            {
+                await api.SendButton(state);
+                await DoAutoRefresh();
+            }
+            catch (Exception ex)
+            {
+                ShowError(ex.ToString(), "Error sending keystroke.");
+            }
+        }
+
         private async void btnUp_Click(object sender, RoutedEventArgs e)
         {
-            await api.SendButton(PPApi.ButtonState.BUTTON_UP);
-            await DoAutoRefresh();
+            await SendKeyStroke(PPApi.ButtonState.BUTTON_UP);
+            
         }
 
         private async void btnRight_Click(object sender, RoutedEventArgs e)
         {
-            await api.SendButton(PPApi.ButtonState.BUTTON_RIGHT);
-            await DoAutoRefresh();
+            await SendKeyStroke(PPApi.ButtonState.BUTTON_RIGHT);
         }
 
         private async void btnDown_Click(object sender, RoutedEventArgs e)
         {
-            await api.SendButton(PPApi.ButtonState.BUTTON_DOWN);
-            await DoAutoRefresh();
+            await SendKeyStroke(PPApi.ButtonState.BUTTON_DOWN);
         }
 
         private async void btnLeft_Click(object sender, RoutedEventArgs e)
         {
-            await api.SendButton(PPApi.ButtonState.BUTTON_LEFT);
-            await DoAutoRefresh();
+            await SendKeyStroke(PPApi.ButtonState.BUTTON_LEFT);
         }
 
         private async void btnEnter_Click(object sender, RoutedEventArgs e)
         {
-            await api.SendButton(PPApi.ButtonState.BUTTON_ENTER);
-            await DoAutoRefresh();
+            await SendKeyStroke(PPApi.ButtonState.BUTTON_ENTER);
         }
 
         private async void btnRotLeft_Click(object sender, RoutedEventArgs e)
         {
-            await api.SendButton(PPApi.ButtonState.BUTTON_ROTLEFT);
-            await DoAutoRefresh();
+            await SendKeyStroke(PPApi.ButtonState.BUTTON_ROTLEFT);
         }
 
         private async void btnRotRight_Click(object sender, RoutedEventArgs e)
         {
-            await api.SendButton(PPApi.ButtonState.BUTTON_ROTRIGHT);
-            await DoAutoRefresh();
+            await SendKeyStroke(PPApi.ButtonState.BUTTON_ROTRIGHT);
         }
 
         private void btnRestart_Click(object sender, RoutedEventArgs e)
         {
-            api.SendRestart();
+            try
+            {
+                api.SendRestart();
+            }
+            catch (Exception ex)
+            {
+                ShowError(ex.ToString(), "Error requesting reboot.");
+            }
         }
 
-        private void btnHfMode_Click(object sender, RoutedEventArgs e)
+        private async void btnHfMode_Click(object sender, RoutedEventArgs e)
         {
-            api.SendHFMode();
+            try
+            {
+               await api.SendHFMode();
+            }
+            catch (Exception ex)
+            {
+                ShowError(ex.ToString(), "Error requesting HF mode.");
+            }
         }
 
         private async void btnScreenshot_Click(object sender, RoutedEventArgs e)
         {
-            await api.SendScreenshot();
+            try
+            {
+                await api.SendScreenshot();
+            }
+            catch (Exception ex) {
+                ShowError(ex.ToString(), "Error requesting screenshot.");
+            }
         }
 
         private void screen_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            //send click
+            //send click, not implemented in fw yet.
         }
 
         private async void screen_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (e.Delta < 0) { await api.SendButton(PPApi.ButtonState.BUTTON_ROTRIGHT);  }
-            if (e.Delta > 0) { await api.SendButton(PPApi.ButtonState.BUTTON_ROTLEFT);  }
+            if (e.Delta < 0) { await SendKeyStroke(PPApi.ButtonState.BUTTON_ROTRIGHT); }
+            if (e.Delta > 0) { await SendKeyStroke(PPApi.ButtonState.BUTTON_ROTLEFT); }
             e.Handled = true;
-            await DoAutoRefresh();
+            e.Handled = true;
         }
 
         private async void screen_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Enter) { await api.SendButton(PPApi.ButtonState.BUTTON_ENTER); e.Handled = true; }
-            if (e.Key == Key.Left) { await api.SendButton(PPApi.ButtonState.BUTTON_LEFT); e.Handled = true; }
-            if (e.Key == Key.Right) { await api.SendButton(PPApi.ButtonState.BUTTON_RIGHT); e.Handled = true; }
-            if (e.Key == Key.Up) { await api.SendButton(PPApi.ButtonState.BUTTON_UP); e.Handled = true; }
-            if (e.Key == Key.Down) { await api.SendButton(PPApi.ButtonState.BUTTON_DOWN); e.Handled = true; }
-
-            if (e.Handled) { await DoAutoRefresh(); }
-            
+            if (e.Key == Key.Enter) { await SendKeyStroke(PPApi.ButtonState.BUTTON_ENTER); e.Handled = true; }
+            if (e.Key == Key.Left) { await SendKeyStroke(PPApi.ButtonState.BUTTON_LEFT); e.Handled = true; }
+            if (e.Key == Key.Right) { await SendKeyStroke(PPApi.ButtonState.BUTTON_RIGHT); e.Handled = true; }
+            if (e.Key == Key.Up) { await SendKeyStroke(PPApi.ButtonState.BUTTON_UP); e.Handled = true; }
+            if (e.Key == Key.Down) { await SendKeyStroke(PPApi.ButtonState.BUTTON_DOWN); e.Handled = true; }
         }
 
         private async void btnFileMan_Click(object sender, RoutedEventArgs e)
         {
-            var browser = new PPFileMan(api);
-            this.Hide();
-            browser.ShowDialog();            
-            this.Show();
+            try
+            {
+                var browser = new PPFileMan(api);
+                this.Hide();
+                browser.ShowDialog();
+                this.Show();
+            } catch { }
         }
 
         private void btnPortRefresh_Click(object sender, RoutedEventArgs e)
@@ -168,19 +196,39 @@ namespace PortaPackRemote
 
         private async Task RefreshScreen()
         {
-            Dispatcher.Invoke(() =>  {  Mouse.OverrideCursor = Cursors.Wait; });
-            var bmp = await api.SendScreenFrameShort();
-            BitmapImage bitmapImage = new BitmapImage();
-            bitmapImage.BeginInit();
-            bitmapImage.StreamSource = ConvertBitmapToMemoryStream(bmp);
-            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-            bitmapImage.EndInit();
-            await Dispatcher.InvokeAsync(() => { screen.Source = bitmapImage; Mouse.OverrideCursor = null; });
+            try
+            {
+                Dispatcher.Invoke(() => { Mouse.OverrideCursor = Cursors.Wait; });
+                var bmp = await api.SendScreenFrameShort();
+                BitmapImage bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = ConvertBitmapToMemoryStream(bmp);
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+                await Dispatcher.InvokeAsync(() => { screen.Source = bitmapImage; Mouse.OverrideCursor = null; });
+            }
+            catch(Exception ex)
+            {
+                ShowError(ex.ToString(), "Error refreshing screen");
+            }
         }
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        private async void btnRefreshScreen_Click(object sender, RoutedEventArgs e)
         {
-            await RefreshScreen();
+            try { 
+                await RefreshScreen();
+            } catch (Exception ex) 
+            {
+                ShowError(ex.ToString(), "Error refreshing screen");
+            }
+            
+        }
+
+
+        private void ShowError(string message, string title = "")
+        {
+            Dispatcher.Invoke(() => { MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error); });
+            
         }
     }
 }
