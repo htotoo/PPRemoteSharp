@@ -65,6 +65,11 @@ namespace PortaPackRemote
                     if (sel == "..") currPath = CdUp(currPath); else currPath += sel;
                     RefreshPath();
                 }
+                else
+                {
+                    //download file
+                    btnDownload_Click(sender, e);
+                }
             }
         }
         static string CdUp(string path)

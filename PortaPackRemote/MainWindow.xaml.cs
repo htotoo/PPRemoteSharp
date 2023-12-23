@@ -50,7 +50,7 @@ namespace PortaPackRemote
                 if (listSerials.SelectedIndex != -1)
                 {
                     await api.OpenPort(listSerials.Text);
-                    await RefreshScreen();
+                    if ((bool)chkAutoRefresh.IsChecked) await RefreshScreen();
                 }
             }
         }
