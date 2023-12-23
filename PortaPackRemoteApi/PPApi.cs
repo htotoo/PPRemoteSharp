@@ -21,11 +21,11 @@ namespace PortaPackRemoteApi
 
         private SerialPort? _serialPort = null;
         // Events
-        public event EventHandler SerialOpened;
-        public event EventHandler SerialClosed;
-        public event EventHandler SerialError;
+        public event EventHandler? SerialOpened;
+        public event EventHandler? SerialClosed;
+        public event EventHandler? SerialError;
 
-        public event EventHandler<string> OnLine;
+        public event EventHandler<string>? OnLine;
         private readonly ManualResetEventSlim lineEvent = new ManualResetEventSlim(false);
 
         private string dataInBuffer = "";
@@ -79,6 +79,7 @@ namespace PortaPackRemoteApi
 
         private void _serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+            if (_serialPort == null) return;
             int bytes = _serialPort.BytesToRead;
             if (bytes <=0)
             {
@@ -220,10 +221,12 @@ namespace PortaPackRemoteApi
             await ReadStringsAsync("ok");
         }
 
+
         public async Task<Bitmap> SendScreenFrameShort()
         {
-            Bitmap bmp = new Bitmap(241, 321);
-            
+#pragma warning disable CA1416 // Validate platform compatibility
+            Bitmap bmp = new(241, 321);
+
             WriteSerial("screenframeshort");
             var lines = await ReadStringsAsync("ok");
             int y = -1;
@@ -248,17 +251,18 @@ namespace PortaPackRemoteApi
                         bmp.SetPixel(x, y, Color.FromArgb(r, g, b));
                     }
                     catch (Exception e){
-                        var oo = 1;
-                        oo+=line.Length;
+                        Trace.WriteLine(e.ToString());
                     }
                 }                
             }
             return bmp;
+#pragma warning restore CA1416 // Validate platform compatibility
         }
 
         public async Task<Bitmap> SendScreenFrame()
         {
-            Bitmap bmp = new Bitmap(241, 321);
+#pragma warning disable CA1416 // Validate platform compatibility
+            Bitmap bmp = new(241, 321);
 
             WriteSerial("screenframeshort");
             var lines = await ReadStringsAsync("ok");
@@ -286,9 +290,10 @@ namespace PortaPackRemoteApi
                 }
             }
             return bmp;
+#pragma warning restore CA1416 // Validate platform compatibility
         }
 
-        public async Task DownloadFile(string src, string dst, Action<int> onProgress = null)
+        public async Task DownloadFile(string src, string dst, Action<int>? onProgress = null)
         {
             WriteSerial("filesize " + src);
             var lines = await ReadStringsAsync(PROMPT);
