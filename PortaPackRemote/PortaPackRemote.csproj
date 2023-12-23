@@ -6,6 +6,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <Authors>HTotoo</Authors>
+    <Version>0.8.0</Version>
+    <AssemblyVersion>0.8.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
