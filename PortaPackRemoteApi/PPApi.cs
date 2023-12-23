@@ -216,9 +216,8 @@ namespace PortaPackRemoteApi
 
         public async Task SendFileDel(string file)
         {
-            //WriteSerial("rm " + file);
-            //await ReadStringsAsync("ok");
-            throw new NotImplementedException();
+            WriteSerial("rm " + file);
+            await ReadStringsAsync("ok");
         }
 
         public async Task<Bitmap> SendScreenFrameShort()

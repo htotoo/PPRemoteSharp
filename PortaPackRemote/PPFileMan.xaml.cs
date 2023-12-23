@@ -162,5 +162,10 @@ namespace PortaPackRemote
                 });
             }
         }
+
+        private void btnUpload_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Sorry, not implemented yet");
+        }
     }
 }
