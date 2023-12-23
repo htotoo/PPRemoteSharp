@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PortaPackRemote"
         mc:Ignorable="d"
-        Title="Porta Pack Remote" Height="417" Width="388"  PreviewKeyUp="screen_KeyUp">
+        Title="Porta Pack Remote" Height="434" Width="388"  PreviewKeyUp="screen_KeyUp">
     <Grid >
         <Button x:Name="btnUp" Content="^" HorizontalAlignment="Left" Margin="300,42,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" Width="20" Height="30" Click="btnUp_Click"/>
         <Button x:Name="btnRight" Content="&gt;" HorizontalAlignment="Left" Margin="328,80,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold"  Width="20" Height="30" Click="btnRight_Click"/>
