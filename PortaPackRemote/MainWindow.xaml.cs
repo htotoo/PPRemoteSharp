@@ -43,7 +43,7 @@ namespace PortaPackRemote
 
         private async void btnConnDisconn_Click(object sender, RoutedEventArgs e)
         {
-            if (api.IsConnected()) { 
+            if (btnConnDisconn.Content.Equals("Disconnect")) { 
                 api.Close(); 
             }
             else
@@ -178,7 +178,11 @@ namespace PortaPackRemote
                 this.Hide();
                 browser.ShowDialog();
                 this.Show();
-            } catch { }
+            } catch (Exception ex)
+            {
+                this.Show();
+                ShowError(ex.ToString(), "File operation fatal error.");
+            }
         }
 
         private void btnPortRefresh_Click(object sender, RoutedEventArgs e)
