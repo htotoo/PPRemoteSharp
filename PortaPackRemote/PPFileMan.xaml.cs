@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using PortaPackRemoteApi;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 
@@ -123,17 +124,38 @@ namespace PortaPackRemote
                 return;
             }
             FileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.FileName =  sel;   
+            string ext = Path.GetExtension(sel);
+            saveFileDialog.DefaultExt =  ext;
+            saveFileDialog.FileName =  sel;
+            saveFileDialog.Filter = ext + " (*"+ext+")|*"+ext;
+
+            saveFileDialog.ShowHiddenItems = true;
+            
+
+
             bool? result = saveFileDialog.ShowDialog();
-            if ( result != null && result==true)
+            if (result != null && result == true)
             {
+                Action<int> progressCallback = value =>
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        progress.Maximum = 100;
+                        progress.Value = value;
+                        progress.InvalidateVisual();
+                    });
+                };
+
                 string src = currPath + sel;
                 string dst = saveFileDialog.FileName;
                 Mouse.OverrideCursor = Cursors.Wait;
-                await _api.DownloadFile(src, dst);
+                await _api.DownloadFile(src, dst, progressCallback);
                 Mouse.OverrideCursor = null;
+                Dispatcher.Invoke(() =>
+                {
+                    progress.Value = 0;
+                });
             }
-
         }
     }
 }

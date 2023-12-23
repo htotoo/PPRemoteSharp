@@ -5,15 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PortaPackRemote"
         mc:Ignorable="d"
-        Title="PPFileMan" Height="450" Width="535">
+        Title="PPFileMan" Height="452" Width="465">
     <Grid>
-        <ListBox x:Name="dirListView" MouseDoubleClick="ListView_MouseDoubleClick" Margin="10,40,187,40"/>
-        <Label Content="Path:" HorizontalAlignment="Left" Margin="10,9,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.406,0.142"/>
+        <ListBox x:Name="dirListView" MouseDoubleClick="ListView_MouseDoubleClick" Margin="10,37,97,30"/>
+        <Label Content="Path:" HorizontalAlignment="Left" Margin="10,7,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.406,0.142"/>
         <Label x:Name="lblPath" Content="/" HorizontalAlignment="Left" Margin="51,6,0,0" VerticalAlignment="Top" Width="207"/>
-        <Button x:Name="btnPwdUp" Content="Cd .." Margin="0,12,142,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="27" Click="btnPwdUp_Click" />
-        <Button x:Name="btnDownload" Content="Download" HorizontalAlignment="Right" Margin="0,42,96,0" VerticalAlignment="Top" Width="73" Click="btnDownload_Click"/>
-        <Button x:Name="btnUpload" Content="Upload" HorizontalAlignment="Right" Margin="0,67,96,0" VerticalAlignment="Top" Width="73"/>
-        <Button x:Name="btnDel" Content="Delete" Margin="0,92,96,0" VerticalAlignment="Top" ToolTip="Delete the selected FILE" Click="btnDel_Click" HorizontalAlignment="Right" Width="73"/>
+        <Button x:Name="btnPwdUp" Content="Cd .." Margin="0,12,46,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="36" Click="btnPwdUp_Click" />
+        <Button x:Name="btnDownload" Content="Download" HorizontalAlignment="Right" Margin="0,42,9,0" VerticalAlignment="Top" Width="73" Click="btnDownload_Click"/>
+        <Button x:Name="btnUpload" Content="Upload" HorizontalAlignment="Right" Margin="0,67,9,0" VerticalAlignment="Top" Width="73"/>
+        <Button x:Name="btnDel" Content="Delete" Margin="0,92,9,0" VerticalAlignment="Top" ToolTip="Delete the selected FILE" Click="btnDel_Click" HorizontalAlignment="Right" Width="73"/>
+        <ProgressBar x:Name="progress" Margin="10,0,10,10" Height="15" VerticalAlignment="Bottom"/>
 
     </Grid>
 </Window>

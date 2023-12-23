@@ -289,7 +289,7 @@ namespace PortaPackRemoteApi
             return bmp;
         }
 
-        public async Task DownloadFile(string src, string dst)
+        public async Task DownloadFile(string src, string dst, Action<int> onProgress = null)
         {
             WriteSerial("filesize " + src);
             var lines = await ReadStringsAsync(PROMPT);
@@ -312,7 +312,7 @@ namespace PortaPackRemoteApi
             }
             var dFile = File.OpenWrite(dst);
             int rem = size;
-            int chunk = 16 * 5;
+            int chunk = 16 * 15;
             while (rem > 0)
             {
                 if (rem<chunk) { chunk = rem; }
@@ -335,6 +335,8 @@ namespace PortaPackRemoteApi
                     rem -= bArr.Length;
                     dFile.Write(bArr);
                 }
+                onProgress?.Invoke((int)((float)(size-rem) / (float)size * 100));
+
             }
             WriteSerial("close");
             dFile.Close();           
