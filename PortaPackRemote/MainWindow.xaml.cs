@@ -172,14 +172,15 @@ namespace PortaPackRemote
 
         private async void btnFileMan_Click(object sender, RoutedEventArgs e)
         {
+            var browser = new PPFileMan(api);
             try
             {
-                var browser = new PPFileMan(api);
                 this.Hide();
                 browser.ShowDialog();
                 this.Show();
             } catch (Exception ex)
             {
+                browser.Close();
                 this.Show();
                 ShowError(ex.ToString(), "File operation fatal error.");
             }

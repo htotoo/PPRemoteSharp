@@ -308,56 +308,62 @@ namespace PortaPackRemoteApi
 
         public async Task DownloadFile(string src, string dst, Action<int>? onProgress = null)
         {
-            if (!WriteSerial("filesize " + src)) return;
-            var lines = await ReadStringsAsync(PROMPT);
-            if (lines.Last() != "ok")
+            try
             {
-                throw new Exception("Error downloading (size) file");
-            }
-            int size = int.Parse(lines[lines.Count-2]);
-            WriteSerial("open " + src);
-            lines = await ReadStringsAsync(PROMPT);
-            if (lines.Last() != "ok" && lines.Last() != "file already open")
-            {
-                throw new Exception("Error downloading (open) file");
-            }
-            WriteSerial("seek 0");
-            lines = await ReadStringsAsync(PROMPT);
-            if (lines.Last() != "ok")
-            {
-                throw new Exception("Error downloading (seek) file");
-            }
-            var dFile = File.OpenWrite(dst);
-            int rem = size;
-            int chunk = 16 * 15;
-            while (rem > 0)
-            {
-                if (rem<chunk) { chunk = rem; }
-                WriteSerial("read " + chunk.ToString());
+                if (!WriteSerial("filesize " + src)) return;
+                var lines = await ReadStringsAsync(PROMPT);
+                if (lines.Last() != "ok")
+                {
+                    throw new Exception("Error downloading (size) file");
+                }
+                int size = int.Parse(lines[lines.Count - 2]);
+                WriteSerial("open " + src);
                 lines = await ReadStringsAsync(PROMPT);
-                lines = lines.Skip(1).ToList();
-                var o = lines.Last();
-               
-                if (o != "ok")
+                if (lines.Last() != "ok" && lines.Last() != "file already open")
                 {
-                    WriteSerial("close");
-                    dFile.Close();
-                    throw new Exception("Error downloading (data) file");
+                    throw new Exception("Error downloading (open) file");
                 }
-                //parse and save!
-
-                for (int i = 0; i < lines.Count - 1; i++)
+                WriteSerial("seek 0");
+                lines = await ReadStringsAsync(PROMPT);
+                if (lines.Last() != "ok")
                 {
-                    var bArr = ParseHexToByte(lines[i].ToUpper());
-                    rem -= bArr.Length;
-                    dFile.Write(bArr);
+                    throw new Exception("Error downloading (seek) file");
                 }
-                onProgress?.Invoke((int)((float)(size-rem) / (float)size * 100));
+                var dFile = File.OpenWrite(dst);
+                int rem = size;
+                int chunk = 62 * 15;
+                while (rem > 0)
+                {
+                    if (rem < chunk) { chunk = rem; }
+                    WriteSerial("read " + chunk.ToString());
+                    lines = await ReadStringsAsync(PROMPT);
+                    lines = lines.Skip(1).ToList();
+                    var o = lines.Last();
 
+                    if (o != "ok")
+                    {
+                        WriteSerial("close");
+                        dFile.Close();
+                        throw new Exception("Error downloading (data) file");
+                    }
+                    //parse and save!
+
+                    for (int i = 0; i < lines.Count - 1; i++)
+                    {
+                        var bArr = ParseHexToByte(lines[i].ToUpper());
+                        rem -= bArr.Length;
+                        dFile.Write(bArr);
+                    }
+                    onProgress?.Invoke((int)((float)(size - rem) / (float)size * 100));
+
+                }
+                dFile.Close();
+                WriteSerial("close");
             }
-            dFile.Close();
-            WriteSerial("close");               
-
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
 
         public async Task UploadFile(string src, string dst, Action<int>? onProgress = null, bool overWrite = false)
