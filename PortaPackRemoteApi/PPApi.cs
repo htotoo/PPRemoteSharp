@@ -14,8 +14,9 @@ namespace PortaPackRemoteApi
          ~PPApi() { Close(); }
 
         //commands: help exit info systime reboot dfu hackrf sd_over_usb flash screenshot write_memory read_memory button ls rm open seek close read write
-        //to implement: info systime reboot dfu hackrf sd_over_usb flash screenshot button ls rm open seek close read write
+        //to implement: info flash writew
         //implemented: reboot dfu hackrf sd_over_usb screenshot button ls
+        //won't implement: help systime write_memory read_memory
 
         //todo detect serial port error / close / disappear
 
@@ -354,9 +355,76 @@ namespace PortaPackRemoteApi
                 onProgress?.Invoke((int)((float)(size-rem) / (float)size * 100));
 
             }
-            WriteSerial("close");
-            dFile.Close();           
+            dFile.Close();
+            WriteSerial("close");               
 
+        }
+
+        public async Task UploadFile(string src, string dst, Action<int>? onProgress = null, bool overWrite = false)
+        {
+            if (!WriteSerial("filesize " + dst)) return;
+            var lines = await ReadStringsAsync(PROMPT);
+            if (lines.Last() == "ok")
+            {
+                if (!overWrite)
+                {
+                    throw new Exception("Error uploading (overwrite) file");
+                }
+                else
+                {
+                    WriteSerial("rm " + dst);
+                    await ReadStringsAsync(PROMPT);
+                }
+            }
+            long size = new FileInfo(src).Length;
+            WriteSerial("open " + src);
+            lines = await ReadStringsAsync(PROMPT);
+            if (lines.Last() != "ok" && lines.Last() != "file already open")
+            {
+                throw new Exception("Error uploading (open) file");
+            }
+            WriteSerial("seek 0");
+            lines = await ReadStringsAsync(PROMPT);
+            if (lines.Last() != "ok")
+            {
+                throw new Exception("Error uploading (seek) file");
+            }
+            var sFile = File.OpenRead(src);
+            sFile.Position = 0;
+            long rem = size;
+            long chunk = 20;//max size 20 char-> 10 byte
+            while (rem > 0)
+            {
+                if (rem < chunk) { chunk = rem; }
+                byte[] readed = new byte[500];
+                sFile.Read(readed, 0, (int)chunk);
+                string toWrite = BytesToHex(readed, (int)chunk);
+
+                WriteSerial("write " + toWrite);
+                lines = await ReadStringsAsync(PROMPT);
+                var o = lines.Last();
+
+                if (o != "ok")
+                {
+                    WriteSerial("close");
+                    sFile.Close();
+                    throw new Exception("Error uploading (data) file");
+                }
+                rem -= chunk;
+                onProgress?.Invoke((int)((float)(size - rem) / (float)size * 100));
+            }
+            sFile.Close();
+            WriteSerial("close");         
+        }
+
+        string BytesToHex(byte[] arr, int size)
+        {
+            StringBuilder hexString = new StringBuilder(size * 2);
+            for (int i = 0; i < size; i++)
+            {
+                hexString.AppendFormat("{0:X2}", arr[i]);
+            }
+            return hexString.ToString();
         }
 
         private byte[] ParseHexToByte(string v)

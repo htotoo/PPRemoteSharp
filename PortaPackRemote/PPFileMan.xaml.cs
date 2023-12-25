@@ -21,7 +21,7 @@ namespace PortaPackRemote
             InitializeComponent();
             RefreshPath();
         }
-        private async void RefreshPath()
+        private async  Task RefreshPath()
         {
             Dispatcher.Invoke(() =>
             {
@@ -163,9 +163,41 @@ namespace PortaPackRemote
             }
         }
 
-        private void btnUpload_Click(object sender, RoutedEventArgs e)
+        private async void btnUpload_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Sorry, not implemented yet");
+            FileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "*.*" + " (*.*)|*.*";
+            openFileDialog.CheckFileExists = true;
+            bool? result = openFileDialog.ShowDialog();
+            if (result != null && result == true)
+            {
+                Action<int> progressCallback = value =>
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        progress.Maximum = 100;
+                        progress.Value = value;
+                        progress.InvalidateVisual();
+                    });
+                };
+                
+                string src = openFileDialog.FileName;
+                string srcBase = Path.GetFileName(src);
+                var dlg = new TextInputDialog(currPath + srcBase, "Uploaded file name");
+                var res = dlg.ShowDialog();
+                if (res != null && res == true)
+                {
+                    string dst = dlg.EnteredText;
+                    Mouse.OverrideCursor = Cursors.Wait;
+                    await _api.UploadFile(src, dst, progressCallback);
+                    Mouse.OverrideCursor = null;
+                    Dispatcher.Invoke(() =>
+                    {
+                        progress.Value = 0;
+                    });
+                    await RefreshPath();
+                }
+            }
         }
     }
 }
