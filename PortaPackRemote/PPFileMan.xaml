@@ -15,6 +15,7 @@
         <Button x:Name="btnUpload" Content="Upload" HorizontalAlignment="Right" Margin="0,67,9,0" VerticalAlignment="Top" Width="73" Click="btnUpload_Click"/>
         <Button x:Name="btnDel" Content="Delete" Margin="0,92,9,0" VerticalAlignment="Top" ToolTip="Delete the selected FILE" Click="btnDel_Click" HorizontalAlignment="Right" Width="73"/>
         <ProgressBar x:Name="progress" Margin="10,0,10,10" Height="15" VerticalAlignment="Bottom"/>
+        <Button x:Name="btnFlash" Content="Flash" Margin="0,129,9,0" VerticalAlignment="Top" ToolTip="Delete the selected FILE" HorizontalAlignment="Right" Width="73" Click="btnFlash_Click"/>
 
     </Grid>
 </Window>

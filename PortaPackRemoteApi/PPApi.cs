@@ -487,6 +487,12 @@ namespace PortaPackRemoteApi
                 OnSerialClosed();  
         }
 
+        public async Task SendFlash(string file)
+        {
+            if (WriteSerial("flash " + file))
+                OnSerialClosed();
+        }
+
 
 
         // Event handlers
@@ -504,6 +510,8 @@ namespace PortaPackRemoteApi
         {
             SerialError?.Invoke(this, EventArgs.Empty);
         }
+
+    
     }
 
 
