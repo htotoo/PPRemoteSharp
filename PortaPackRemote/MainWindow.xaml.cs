@@ -234,5 +234,10 @@ namespace PortaPackRemote
             Dispatcher.Invoke(() => { MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error); });
             
         }
+
+        private async void btnSd_Click(object sender, RoutedEventArgs e)
+        {
+            await api.SendSDOUsb();
+        }
     }
 }

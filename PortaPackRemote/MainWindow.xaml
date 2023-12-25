@@ -24,15 +24,16 @@
         <Image x:Name="screen" Margin="10,41,0,0" Stretch="None" HorizontalAlignment="Left" Width="248" Height="326" VerticalAlignment="Top" MouseUp="screen_MouseUp" MouseWheel="screen_MouseWheel" Focusable="True"/>
         <ComboBox x:Name="listSerials" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="0"/>
         <Button x:Name="btnConnDisconn" Content="Connect" HorizontalAlignment="Left" Margin="144,10,0,0" VerticalAlignment="Top" Click="btnConnDisconn_Click"/>
-        <Button x:Name="btnFileMan" Content="File manager" HorizontalAlignment="Left" Margin="274,238,0,0" VerticalAlignment="Top" Click="btnFileMan_Click"/>
-        <Button x:Name="btnRestart" Content="Restart" HorizontalAlignment="Left" Margin="274,274,0,0" VerticalAlignment="Top" Width="72" Click="btnRestart_Click"/>
-        <Button x:Name="btnHfMode" Content="HF mode" HorizontalAlignment="Left" Margin="274,313,0,0" VerticalAlignment="Top" Width="72" Click="btnHfMode_Click"/>
+        <Button x:Name="btnFileMan" Content="File manager" HorizontalAlignment="Left" Margin="274,231,0,0" VerticalAlignment="Top" Click="btnFileMan_Click" Width="78"/>
+        <Button x:Name="btnRestart" Content="Restart" HorizontalAlignment="Left" Margin="274,309,0,0" VerticalAlignment="Top" Width="78" Click="btnRestart_Click"/>
+        <Button x:Name="btnHfMode" Content="HF mode" HorizontalAlignment="Left" Margin="274,348,0,0" VerticalAlignment="Top" Width="78" Click="btnHfMode_Click"/>
         <Button x:Name="btnRotRight" Content="↻" HorizontalAlignment="Left" Margin="270,150,0,0" VerticalAlignment="Top" Click="btnRotRight_Click"/>
         <Button x:Name="btnRotLeft" Content="↺" HorizontalAlignment="Left" Margin="338,150,0,0" VerticalAlignment="Top" Click="btnRotLeft_Click"/>
-        <Button x:Name="btnScreenshot" Content="Screenshot" HorizontalAlignment="Left" Margin="274,193,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.237,0.119" Width="72" Click="btnScreenshot_Click"/>
+        <Button x:Name="btnScreenshot" Content="Screenshot" HorizontalAlignment="Left" Margin="274,193,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.237,0.119" Width="78" Click="btnScreenshot_Click"/>
         <Button x:Name="btnPortRefresh" Content="Refresh" HorizontalAlignment="Left" Margin="215,10,0,0" VerticalAlignment="Top" Click="btnPortRefresh_Click"/>
         <Button x:Name="btnRefreshScreen" Content="Refresh" HorizontalAlignment="Left" Margin="10,370,0,0" VerticalAlignment="Top" Click="btnRefreshScreen_Click"/>
         <CheckBox x:Name="chkAutoRefresh" Content="Auto refresh after click" HorizontalAlignment="Left" Margin="70,372,0,0" VerticalAlignment="Top" IsChecked="True"/>
+        <Button x:Name="btnSd" Content="SD mode" HorizontalAlignment="Left" Margin="274,271,0,0" VerticalAlignment="Top" Width="78" Click="btnSd_Click"/>
 
     </Grid>
 </Window>
