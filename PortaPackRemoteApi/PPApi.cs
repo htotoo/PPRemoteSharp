@@ -14,8 +14,8 @@ namespace PortaPackRemoteApi
          ~PPApi() { Close(); }
 
         //commands: help exit info systime reboot dfu hackrf sd_over_usb flash screenshot write_memory read_memory button ls rm open seek close read write
-        //to implement: info flash writew
-        //implemented: reboot dfu hackrf sd_over_usb screenshot button ls
+        //to implement: info  writew
+        //implemented: reboot dfu hackrf sd_over_usb screenshot button ls flash
         //won't implement: help systime write_memory read_memory
 
         //todo detect serial port error / close / disappear
@@ -310,6 +310,7 @@ namespace PortaPackRemoteApi
         {
             try
             {
+                if (!WriteSerial("close")) return;
                 if (!WriteSerial("filesize " + src)) return;
                 var lines = await ReadStringsAsync(PROMPT);
                 if (lines.Last() != "ok")

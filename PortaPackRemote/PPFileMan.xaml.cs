@@ -67,7 +67,7 @@ namespace PortaPackRemote
                 }
                 else
                 {
-                    if (sel.EndsWith(".bin"))
+                    if (sel.EndsWith(".bin") || sel.EndsWith(".ppfw.tar"))
                     {
                         btnFlash_Click(sender, e);
                     }
@@ -212,15 +212,15 @@ namespace PortaPackRemote
         {
             if (dirListView.SelectedItem == null) return;
             var sel = (string)dirListView.SelectedItem;
-            if (!sel.EndsWith(".bin"))
+            if (!sel.EndsWith(".bin") && !sel.EndsWith(".ppfw.tar"))
             {
-                MessageBox.Show("Only BIN files can be flashed (yet)");
+                MessageBox.Show("Only BIN AND PPFW.TAR files can be flashed (yet)");
                 return;
             }
             if (MessageBox.Show("Are you sure you want to flash this image: " + sel, "Flash", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 await _api.SendFlash(currPath + sel);
-                Close(); //flashing will reset serial too
+                //Close(); //flashing will reset serial too
             }
             
         }

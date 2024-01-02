@@ -30,6 +30,7 @@ namespace PortaPackRemote
             Dispatcher.Invoke(() =>
             {
                 btnConnDisconn.Content = "Connect";
+                screen.Source = null;
             } );
         }
 
