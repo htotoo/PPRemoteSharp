@@ -15,7 +15,7 @@ namespace PortaPackRemoteApi
 
         //commands: help exit info systime reboot dfu hackrf sd_over_usb flash screenshot write_memory read_memory button ls rm open seek close read write
         //to implement: info  writew
-        //implemented: reboot dfu hackrf sd_over_usb screenshot button ls flash
+        //implemented: reboot dfu hackrf sd_over_usb screenshot button ls flash touch
         //won't implement: help systime write_memory read_memory
 
         //todo detect serial port error / close / disappear
@@ -225,6 +225,13 @@ namespace PortaPackRemoteApi
             if (WriteSerial($"button {(int)btn}"))
                 await ReadStringsAsync(PROMPT);
         }
+
+        public async Task SendTouch(int x, int y)
+        {
+            if (WriteSerial($"touch {(int)x} {(int)y}"))
+                await ReadStringsAsync(PROMPT);
+        }
+
 
         public async Task SendFileDel(string file)
         {

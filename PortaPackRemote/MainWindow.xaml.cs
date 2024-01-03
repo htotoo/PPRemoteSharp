@@ -1,4 +1,5 @@
 ﻿using PortaPackRemoteApi;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
@@ -149,9 +150,10 @@ namespace PortaPackRemote
             }
         }
 
-        private void screen_MouseUp(object sender, MouseButtonEventArgs e)
+        private async void screen_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            //send click, not implemented in fw yet.
+            await api.SendTouch((int)e.GetPosition((IInputElement)sender).X, (int)e.GetPosition((IInputElement)sender).Y);
+            if ((bool)chkAutoRefresh.IsChecked) await RefreshScreen();
         }
 
         private async void screen_MouseWheel(object sender, MouseWheelEventArgs e)
