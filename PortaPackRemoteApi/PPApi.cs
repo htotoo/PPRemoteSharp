@@ -13,11 +13,6 @@ namespace PortaPackRemoteApi
         static string PROMPT = "ch> ";
          ~PPApi() { Close(); }
 
-        //commands: help exit info systime reboot dfu hackrf sd_over_usb flash screenshot write_memory read_memory button ls rm open seek close read write
-        //to implement: info  writew
-        //implemented: reboot dfu hackrf sd_over_usb screenshot button ls flash touch
-        //won't implement: help systime write_memory read_memory
-
         //todo detect serial port error / close / disappear
 
         private SerialPort? _serialPort = null;
@@ -224,6 +219,18 @@ namespace PortaPackRemoteApi
         {
             if (WriteSerial($"button {(int)btn}"))
                 await ReadStringsAsync(PROMPT);
+        }
+        public async Task SendKeyboard(string keys)
+        {
+            byte[] readed = Encoding.ASCII.GetBytes(keys);
+            string toWrite = BytesToHex(readed, readed.Length);
+            for (int i=0; i<toWrite.Length; i+=30)
+            {
+                int rem = 30;
+                if (toWrite.Length - i < 30) rem = toWrite.Length - i;
+                if (WriteSerial($"keyboard " + toWrite.Substring(i,rem)))
+                    await ReadStringsAsync(PROMPT);
+            }
         }
 
         public async Task SendTouch(int x, int y)

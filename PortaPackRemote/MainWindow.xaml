@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PortaPackRemote"
         mc:Ignorable="d"
-        Title="Porta Pack Remote" Height="434" Width="388"  PreviewKeyUp="screen_KeyUp">
+        Title="Porta Pack Remote" Height="524" Width="509">
     <Grid >
         <Button x:Name="btnUp" Content="^" HorizontalAlignment="Left" Margin="300,42,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" Width="20" Height="30" Click="btnUp_Click"/>
         <Button x:Name="btnRight" Content="&gt;" HorizontalAlignment="Left" Margin="328,80,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold"  Width="20" Height="30" Click="btnRight_Click"/>
@@ -20,8 +20,8 @@
             </Button.RenderTransform>
         </Button>
         <Button x:Name="btnLeft" Content="&lt;" HorizontalAlignment="Left" Margin="273,80,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold"  Width="20" Height="30" Click="btnLeft_Click"/>
-        <Button x:Name="btnEnter" Content="O" HorizontalAlignment="Left" Margin="300,80,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" Width="20" Height="30" Click="btnEnter_Click"/>
-        <Image x:Name="screen" Margin="10,41,0,0" Stretch="None" HorizontalAlignment="Left" Width="248" Height="326" VerticalAlignment="Top" MouseUp="screen_MouseUp" MouseWheel="screen_MouseWheel" Focusable="True"/>
+        <Button x:Name="btnEnter" Content="O" HorizontalAlignment="Left" Margin="300,80,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" Width="20" Height="30" Click="btnEnter_Click" KeyDown="screen_KeyUp"/>
+        <Image x:Name="screen" Margin="10,74,0,0" Stretch="None" HorizontalAlignment="Left" Width="248" Height="326" VerticalAlignment="Top" MouseUp="screen_MouseUp" MouseWheel="screen_MouseWheel" Focusable="True"/>
         <ComboBox x:Name="listSerials" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="120" SelectedIndex="0"/>
         <Button x:Name="btnConnDisconn" Content="Connect" HorizontalAlignment="Left" Margin="144,10,0,0" VerticalAlignment="Top" Click="btnConnDisconn_Click"/>
         <Button x:Name="btnFileMan" Content="File manager" HorizontalAlignment="Left" Margin="274,231,0,0" VerticalAlignment="Top" Click="btnFileMan_Click" Width="78"/>
@@ -31,9 +31,14 @@
         <Button x:Name="btnRotLeft" Content="↺" HorizontalAlignment="Left" Margin="338,150,0,0" VerticalAlignment="Top" Click="btnRotLeft_Click"/>
         <Button x:Name="btnScreenshot" Content="Screenshot" HorizontalAlignment="Left" Margin="274,193,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.237,0.119" Width="78" Click="btnScreenshot_Click"/>
         <Button x:Name="btnPortRefresh" Content="Refresh" HorizontalAlignment="Left" Margin="215,10,0,0" VerticalAlignment="Top" Click="btnPortRefresh_Click"/>
-        <Button x:Name="btnRefreshScreen" Content="Refresh" HorizontalAlignment="Left" Margin="10,370,0,0" VerticalAlignment="Top" Click="btnRefreshScreen_Click"/>
-        <CheckBox x:Name="chkAutoRefresh" Content="Auto refresh after click" HorizontalAlignment="Left" Margin="70,372,0,0" VerticalAlignment="Top" IsChecked="True"/>
+        <Button x:Name="btnRefreshScreen" Content="Refresh" HorizontalAlignment="Left" Margin="10,47,0,0" VerticalAlignment="Top" Click="btnRefreshScreen_Click"/>
+        <CheckBox x:Name="chkAutoRefresh" Content="Auto refresh after click" HorizontalAlignment="Left" Margin="70,49,0,0" VerticalAlignment="Top" IsChecked="True"/>
         <Button x:Name="btnSd" Content="SD mode" HorizontalAlignment="Left" Margin="274,271,0,0" VerticalAlignment="Top" Width="78" Click="btnSd_Click"/>
+        <Label Content="Keyboard" HorizontalAlignment="Left" Height="25" Margin="10,407,0,0" VerticalAlignment="Top" Width="60"/>
+        <TextBox x:Name="txtKeyboard" HorizontalAlignment="Left" Margin="16,437,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="242" KeyUp="txtKeyboard_KeyUp"/>
+        <CheckBox x:Name="chkChrBc" Content="Char by char" HorizontalAlignment="Left" Margin="94,412,0,0" VerticalAlignment="Top" Checked="chkChrBc_Checked" Unchecked="chkChrBc_Checked" IsChecked="True"/>
+        <Button x:Name="btnKeySend" Content="Send text" HorizontalAlignment="Left" Margin="274,435,0,0" VerticalAlignment="Top" Click="btnKeySend_Click" IsDefault="True" IsEnabled="False"/>
+        <Button x:Name="btnBackspace" Content="Del" HorizontalAlignment="Left" Height="18" Margin="338,436,0,0" VerticalAlignment="Top" Width="41" Click="btnBackspace_Click"/>
 
     </Grid>
 </Window>

@@ -19,6 +19,7 @@ namespace PortaPackRemote
             api.SerialOpened += Api_SerialOpened;
             api.SerialClosed += Api_SerialClosed;
             api.SerialError += Api_SerialError;
+            btnEnter.Focus();
         }
 
         private void Api_SerialError(object? sender, EventArgs e)
@@ -53,7 +54,8 @@ namespace PortaPackRemote
                 if (listSerials.SelectedIndex != -1)
                 {
                     await api.OpenPort(listSerials.Text);
-                    if ((bool)chkAutoRefresh.IsChecked) await RefreshScreen();
+                    await DoAutoRefresh();
+                    btnEnter.Focus();
                 }
             }
         }
@@ -152,8 +154,9 @@ namespace PortaPackRemote
 
         private async void screen_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            btnEnter.Focus();
             await api.SendTouch((int)e.GetPosition((IInputElement)sender).X, (int)e.GetPosition((IInputElement)sender).Y);
-            if ((bool)chkAutoRefresh.IsChecked) await RefreshScreen();
+            await DoAutoRefresh();
         }
 
         private async void screen_MouseWheel(object sender, MouseWheelEventArgs e)
@@ -161,16 +164,17 @@ namespace PortaPackRemote
             if (e.Delta < 0) { await SendKeyStroke(PPApi.ButtonState.BUTTON_ROTRIGHT); }
             if (e.Delta > 0) { await SendKeyStroke(PPApi.ButtonState.BUTTON_ROTLEFT); }
             e.Handled = true;
-            e.Handled = true;
         }
 
         private async void screen_KeyUp(object sender, KeyEventArgs e)
         {
+            if (txtKeyboard.IsKeyboardFocused) return;
             if (e.Key == Key.Enter) { await SendKeyStroke(PPApi.ButtonState.BUTTON_ENTER); e.Handled = true; }
             if (e.Key == Key.Left) { await SendKeyStroke(PPApi.ButtonState.BUTTON_LEFT); e.Handled = true; }
             if (e.Key == Key.Right) { await SendKeyStroke(PPApi.ButtonState.BUTTON_RIGHT); e.Handled = true; }
             if (e.Key == Key.Up) { await SendKeyStroke(PPApi.ButtonState.BUTTON_UP); e.Handled = true; }
             if (e.Key == Key.Down) { await SendKeyStroke(PPApi.ButtonState.BUTTON_DOWN); e.Handled = true; }
+            if (e.Handled) btnEnter.Focus();
         }
 
         private async void btnFileMan_Click(object sender, RoutedEventArgs e)
@@ -242,6 +246,52 @@ namespace PortaPackRemote
         private async void btnSd_Click(object sender, RoutedEventArgs e)
         {
             await api.SendSDOUsb();
+        }
+
+        private void chkChrBc_Checked(object sender, RoutedEventArgs e)
+        {
+            btnKeySend.IsEnabled = !(bool)chkChrBc.IsChecked;
+            txtKeyboard.Text = "";
+        }
+
+        private async void txtKeyboard_KeyUp(object sender, KeyEventArgs e)
+        {
+            if ((bool)chkChrBc.IsChecked)
+            {
+                e.Handled = true;
+                string toSend = txtKeyboard.Text;
+                if (e.Key == Key.Back) toSend = "\b";
+                if (e.Key == Key.Delete) toSend = "\b";
+                txtKeyboard.Text = "";
+                txtKeyboard.IsEnabled = false;
+                await api.SendKeyboard(toSend);
+                await DoAutoRefresh();
+                txtKeyboard.IsEnabled = true;
+                txtKeyboard.Focus();
+            }
+            e.Handled = true;
+        }
+
+        private async void btnKeySend_Click(object sender, RoutedEventArgs e)
+        {
+            string toSend = txtKeyboard.Text;
+            txtKeyboard.Text = "";
+            txtKeyboard.IsEnabled = false;
+            await api.SendKeyboard(toSend);
+            await DoAutoRefresh();
+            txtKeyboard.IsEnabled = true;
+            txtKeyboard.Focus();
+        }
+
+        private async void btnBackspace_Click(object sender, RoutedEventArgs e)
+        {
+            string toSend = "\b";
+            txtKeyboard.Text = "";
+            txtKeyboard.IsEnabled = false;
+            await api.SendKeyboard(toSend);
+            await DoAutoRefresh();
+            txtKeyboard.IsEnabled = true;
+            txtKeyboard.Focus();
         }
     }
 }
