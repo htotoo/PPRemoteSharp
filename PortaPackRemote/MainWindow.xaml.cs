@@ -250,8 +250,8 @@ namespace PortaPackRemote
 
         private void chkChrBc_Checked(object sender, RoutedEventArgs e)
         {
-            btnKeySend.IsEnabled = !(bool)chkChrBc.IsChecked;
-            txtKeyboard.Text = "";
+            if (btnKeySend != null) btnKeySend.IsEnabled = !(bool)chkChrBc.IsChecked;
+            if (txtKeyboard != null) txtKeyboard.Text = "";
         }
 
         private async void txtKeyboard_KeyUp(object sender, KeyEventArgs e)
