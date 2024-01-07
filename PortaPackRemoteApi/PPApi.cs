@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing;
 using System.IO.Ports;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PortaPackRemoteApi
 {
@@ -186,6 +183,7 @@ namespace PortaPackRemoteApi
                 {
                     line = line + "\n\r";
                 }
+                _serialPort.DiscardInBuffer();
                 _serialPort.BaseStream.Flush();
                 int chunkSize = 32;
                 // Send data in chunks
@@ -430,13 +428,15 @@ namespace PortaPackRemoteApi
                 {
                     WriteSerial("close");
                     sFile.Close();
+                    await ReadStringsAsync(PROMPT);
                     throw new Exception("Error uploading (data) file");
                 }
                 rem -= chunk;
                 onProgress?.Invoke((int)((float)(size - rem) / (float)size * 100));
             }
             sFile.Close();
-            WriteSerial("close");         
+            WriteSerial("close");
+            await ReadStringsAsync(PROMPT);
         }
 
         string BytesToHex(byte[] arr, int size)
