@@ -124,7 +124,7 @@ namespace PortaPackRemoteApi
             while (true)
             {
                 //lineEvent.Wait(10000);
-                await Task.Run(() => lineEvent.Wait(10000));
+                await Task.Run(() => lineEvent.Wait(12000));
                 if (!lineEvent.IsSet)
                 {
                     lineEvent.Reset();
@@ -325,6 +325,7 @@ namespace PortaPackRemoteApi
             try
             {
                 if (!WriteSerial("close")) return;
+                await ReadStringsAsync(PROMPT);
                 if (!WriteSerial("filesize " + src)) return;
                 var lines = await ReadStringsAsync(PROMPT);
                 if (lines.Last() != "ok")
