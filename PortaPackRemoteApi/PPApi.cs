@@ -75,11 +75,11 @@ namespace PortaPackRemoteApi
         {
             if (_serialPort == null) return;
             int bytes = _serialPort.BytesToRead;
+            sentcommandRn = false;
             if (bytes <=0)
             {
                 OnSerialError();
-            }
-            sentcommandRn = false;
+            }            
 
             byte[] buffer = new byte[bytes];
             _serialPort.Read(buffer, 0, bytes);
@@ -240,7 +240,7 @@ namespace PortaPackRemoteApi
 
         public async Task SendFileDel(string file)
         {
-            if (WriteSerial("rm " + file))
+            if (WriteSerial("unlink " + file))
                 await ReadStringsAsync("ok");
         }
 
@@ -322,7 +322,7 @@ namespace PortaPackRemoteApi
         {
             try
             {
-                if (!WriteSerial("close")) return;
+                if (!WriteSerial("fclose")) return;
                 await ReadStringsAsync(PROMPT);
                 if (!WriteSerial("filesize " + src)) return;
                 var lines = await ReadStringsAsync(PROMPT);
@@ -331,13 +331,13 @@ namespace PortaPackRemoteApi
                     throw new Exception("Error downloading (size) file");
                 }
                 int size = int.Parse(lines[lines.Count - 2]);
-                WriteSerial("open " + src);
+                WriteSerial("fopen " + src);
                 lines = await ReadStringsAsync(PROMPT);
                 if (lines.Last() != "ok" && lines.Last() != "file already open")
                 {
                     throw new Exception("Error downloading (open) file");
                 }
-                WriteSerial("seek 0");
+                WriteSerial("fseek 0");
                 lines = await ReadStringsAsync(PROMPT);
                 if (lines.Last() != "ok")
                 {
@@ -349,14 +349,14 @@ namespace PortaPackRemoteApi
                 while (rem > 0)
                 {
                     if (rem < chunk) { chunk = rem; }
-                    WriteSerial("read " + chunk.ToString());
+                    WriteSerial("fread " + chunk.ToString());
                     lines = await ReadStringsAsync(PROMPT);
                     lines = lines.Skip(1).ToList();
                     var o = lines.Last();
 
                     if (o != "ok")
                     {
-                        WriteSerial("close");
+                        WriteSerial("fclose");
                         dFile.Close();
                         throw new Exception("Error downloading (data) file");
                     }
@@ -372,7 +372,7 @@ namespace PortaPackRemoteApi
 
                 }
                 dFile.Close();
-                WriteSerial("close");
+                WriteSerial("fclose");
             }
             catch (Exception e)
             {
@@ -392,18 +392,18 @@ namespace PortaPackRemoteApi
                 }
                 else
                 {
-                    WriteSerial("rm " + dst);
+                    WriteSerial("unlink " + dst);
                     await ReadStringsAsync(PROMPT);
                 }
             }
             long size = new FileInfo(src).Length;
-            WriteSerial("open " + src);
+            WriteSerial("fopen " + dst);
             lines = await ReadStringsAsync(PROMPT);
             if (lines.Last() != "ok" && lines.Last() != "file already open")
             {
                 throw new Exception("Error uploading (open) file");
             }
-            WriteSerial("seek 0");
+            WriteSerial("fseek 0");
             lines = await ReadStringsAsync(PROMPT);
             if (lines.Last() != "ok")
             {
@@ -420,7 +420,7 @@ namespace PortaPackRemoteApi
                 sFile.Read(readed, 0, (int)chunk);
                 string toWrite = BytesToHex(readed, (int)chunk);
 
-                WriteSerial("write " + toWrite);
+                WriteSerial("fwrite " + toWrite);
                 lines = await ReadStringsAsync(PROMPT);
                 var o = lines.Last();
 
@@ -435,7 +435,7 @@ namespace PortaPackRemoteApi
                 onProgress?.Invoke((int)((float)(size - rem) / (float)size * 100));
             }
             sFile.Close();
-            WriteSerial("close");
+            WriteSerial("fclose");
             await ReadStringsAsync(PROMPT);
         }
 
