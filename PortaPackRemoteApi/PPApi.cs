@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System.Collections;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.IO.Ports;
 using System.Text;
 
@@ -100,6 +102,7 @@ namespace PortaPackRemoteApi
                 OnLineReceived(PROMPT);
             }
         }
+
         private void OnLineReceived(string line)
         {
             lock(lastLines)
@@ -113,22 +116,39 @@ namespace PortaPackRemoteApi
             OnLine?.Invoke(this,line);
             Trace.WriteLine(line);
         }
-        private async Task<List<string>> ReadStringsAsync(string endMarker)
+
+        private void PreWaitForReply()
         {
-            lock (lastLines) { lastLines.Clear(); isWaitingForReply = true; }
+            lock (lastLines) { lastLines.Clear(); }
+            isWaitingForReply = true;
             lineEvent.Reset();
+        }
+
+        private async Task<List<string>> ReadStringsAsync(string endMarker, bool presetWait = false)
+        {
+            isWaitingForReply = true;
+            if (!presetWait) { lock (lastLines) { lastLines.Clear(); }
+                lineEvent.Reset();
+            }
+            
             List<string> myLines = new List<string>();
+            bool isFirst = true;
             while (true)
             {
                 //lineEvent.Wait(10000);
-                await Task.Run(() => lineEvent.Wait(12000));
-                if (!lineEvent.IsSet)
+                if (!isFirst)
                 {
-                    lineEvent.Reset();
-                    return myLines; //error
+                    await Task.Run(() => lineEvent.Wait(12000));
+
+                    if (!lineEvent.IsSet)
+                    {
+                        lineEvent.Reset();
+                        return myLines; //error
+                    }
                 }
-                lineEvent.Reset();                
-                lock(lastLines)
+                lineEvent.Reset();
+                isFirst = false;
+                lock (lastLines)
                 {
                     int i = 0;
                     for (i = 0; i<lastLines.Count; i++)
@@ -152,6 +172,8 @@ namespace PortaPackRemoteApi
 
         public void Close()
         {
+            sentcommandRn = false;
+            isWaitingForReply = false;
             try
             {
                 if (_serialPort != null && _serialPort.IsOpen)
@@ -205,6 +227,37 @@ namespace PortaPackRemoteApi
             return false;
         }
 
+        public async Task<bool> WriteSerialBinary(byte[] data)
+        {
+            try
+            {
+                if (_serialPort == null || !_serialPort.IsOpen)
+                {
+                    OnSerialError(); return false;
+                }
+                
+                _serialPort.BaseStream.Flush();
+                int chunkSize = 30;
+                // Send data in chunks
+                for (int i = 0; i < data.Length; i += chunkSize)
+                {
+                    int remainingBytes = Math.Min(chunkSize, data.Length - i);
+                    await Task.Delay(10);
+                    _serialPort.BaseStream.Write(data, i, remainingBytes);
+                    _serialPort.BaseStream.Flush();
+                    Trace.WriteLine(i.ToString());
+                }
+                sentcommandRn = true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.ToString());
+            }
+            return false;
+        }
+
+       
 
         public async Task<List<string>> LS(string path = "/")
         {
@@ -438,6 +491,76 @@ namespace PortaPackRemoteApi
             WriteSerial("fclose");
             await ReadStringsAsync(PROMPT);
         }
+
+        public async Task UploadFileBinary(string src, string dst, Action<int>? onProgress = null, bool overWrite = false)
+        {
+            if (!WriteSerial("filesize " + dst)) return;
+            var lines = await ReadStringsAsync(PROMPT);
+            if (lines.Last() == "ok")
+            {
+                if (!overWrite)
+                {
+                    throw new Exception("Error uploading (overwrite) file");
+                }
+                else
+                {
+                    WriteSerial("unlink " + dst);
+                    await ReadStringsAsync(PROMPT);
+                }
+            }
+            long size = new FileInfo(src).Length;
+            WriteSerial("fopen " + dst);
+            lines = await ReadStringsAsync(PROMPT);
+            if (lines.Last() != "ok" && lines.Last() != "file already open")
+            {
+                throw new Exception("Error uploading (open) file");
+            }
+            WriteSerial("fseek 0");
+            lines = await ReadStringsAsync(PROMPT);
+            if (lines.Last() != "ok")
+            {
+                throw new Exception("Error uploading (seek) file");
+            }
+            var sFile = File.OpenRead(src);
+            sFile.Position = 0;
+            long rem = size;
+            long chunk = 100;
+            /*
+             byte[] byteArray = Enumerable.Repeat<byte>((byte)i, 300).ToArray<byte>();
+                WriteSerial("fwb 300");
+                await ReadStringsAsync("send");
+                WriteSerialBinary(byteArray);
+                Trace.WriteLine(i.ToString());
+                await ReadStringsAsync(PROMPT);
+            */
+            while (rem > 0)
+            {
+                if (rem < chunk) { chunk = rem; }
+                byte[] readed = new byte[chunk];
+                sFile.Read(readed, 0, (int)chunk);
+                //PreWaitForReply();
+                WriteSerial("fwb " + chunk.ToString());
+                await ReadStringsAsync("send", false);
+                PreWaitForReply();
+                await WriteSerialBinary(readed);
+                lines = await ReadStringsAsync(PROMPT, true);                
+                var o = lines.Last();
+                if (o != "ok")
+                {
+                    WriteSerial("fclose");
+                    sFile.Close();
+                    await ReadStringsAsync(PROMPT);
+                    throw new Exception("Error uploading (data) file");
+                } 
+                rem -= chunk;
+                onProgress?.Invoke((int)((float)(size - rem) / (float)size * 100));
+            }
+            sFile.Close();
+            WriteSerial("fclose");
+            await ReadStringsAsync(PROMPT);
+        }
+
+
 
         string BytesToHex(byte[] arr, int size)
         {
