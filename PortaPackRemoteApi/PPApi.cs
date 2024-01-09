@@ -192,10 +192,10 @@ namespace PortaPackRemoteApi
 
 
 
-        public bool WriteSerial(string line) 
+        public bool WriteSerial(string line, bool ignoreLock = false) 
         {
             Trace.WriteLine(">" + line);
-            if (sentcommandRn || isWaitingForReply)
+            if ((sentcommandRn || isWaitingForReply) && ! ignoreLock)
             {
                 Trace.WriteLine("SEND COND FAILED");
                 return false;
@@ -222,7 +222,6 @@ namespace PortaPackRemoteApi
                     _serialPort.Write(byteArray, 0, byteArray.Length);
                     // Flush the serial port
                     _serialPort.BaseStream.Flush();
-                    Thread.Sleep(7);
                 }
                 //sentcommandRn = true;
                 return true;
@@ -243,12 +242,12 @@ namespace PortaPackRemoteApi
                 }
                 
                 _serialPort.BaseStream.Flush();
-                int chunkSize = 64;
+                int chunkSize = 300;
                 // Send data in chunks
                 for (int i = 0; i < data.Length; i += chunkSize)
                 {
                     int remainingBytes = Math.Min(chunkSize, data.Length - i);
-                    await Task.Delay(7);
+                    await Task.Delay(10);
                     _serialPort.BaseStream.Write(data, i, remainingBytes);
                     _serialPort.BaseStream.Flush();
                     Trace.WriteLine(i.ToString());
@@ -529,8 +528,9 @@ namespace PortaPackRemoteApi
             {
                 throw new Exception("Error uploading (open) file");
             }
-            WriteSerial("fseek 0");
-            lines = await ReadStringsAsync(PROMPT);
+            PreWaitForReply();
+            WriteSerial("fseek 0", true);
+            lines = await ReadStringsAsync(PROMPT, true);
             if (lines.Last() != "ok")
             {
                 throw new Exception("Error uploading (seek) file");
@@ -556,9 +556,8 @@ namespace PortaPackRemoteApi
                 //PreWaitForReply();
                 WriteSerial("fwb " + chunk.ToString());
                 await ReadStringsAsync("send", false);
-                PreWaitForReply();
                 await WriteSerialBinary(readed);
-                lines = await ReadStringsAsync(PROMPT, true);                
+                lines = await ReadStringsAsync(PROMPT);                
                 var o = lines.Last();
                 if (o != "ok")
                 {
@@ -665,7 +664,7 @@ namespace PortaPackRemoteApi
             SerialError?.Invoke(this, EventArgs.Empty);
         }
 
-    
+  
     }
 
 
