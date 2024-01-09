@@ -97,7 +97,7 @@ namespace PortaPackRemoteApi
                 dataInBuffer = dataInBuffer.Remove(0,o + 2);
                 o = dataInBuffer.IndexOf("\r\n");
             }
-            if (dataInBuffer == PROMPT) //bc it has no line ending, we must send it too
+            if (dataInBuffer.EndsWith(PROMPT)) //bc it has no line ending, we must send it too
             {
                 dataInBuffer = "";
                 OnLineReceived(PROMPT);
@@ -144,6 +144,7 @@ namespace PortaPackRemoteApi
                     if (!lineEvent.IsSet)
                     {
                         lineEvent.Reset();
+                        isWaitingForReply = false;
                         return myLines; //error
                     }
                 }
@@ -247,7 +248,7 @@ namespace PortaPackRemoteApi
                 for (int i = 0; i < data.Length; i += chunkSize)
                 {
                     int remainingBytes = Math.Min(chunkSize, data.Length - i);
-                    await Task.Delay(10);
+                    await Task.Delay(13);
                     _serialPort.BaseStream.Write(data, i, remainingBytes);
                     _serialPort.BaseStream.Flush();
                     Trace.WriteLine(i.ToString());
@@ -319,7 +320,11 @@ namespace PortaPackRemoteApi
                 for (int o = 0; o < line.Length; o+=1)
                 {
                     x++;
-                    if (x >= 240) break;
+                    if (x >= 240)
+                    {
+                        Trace.WriteLine("Invalid line: " + y.ToString());
+                        break;
+                    }
                     try
                     {
                         byte[] bys = Encoding.ASCII.GetBytes(line.Substring(o, 1));
@@ -470,7 +475,7 @@ namespace PortaPackRemoteApi
             var sFile = File.OpenRead(src);
             sFile.Position = 0;
             long rem = size;
-            long chunk = 20;//max size 20 char-> 10 byte
+            long chunk = 54/2; 
             int trycount = 0;
             while (rem > 0)
             {
@@ -538,7 +543,7 @@ namespace PortaPackRemoteApi
             var sFile = File.OpenRead(src);
             sFile.Position = 0;
             long rem = size;
-            long chunk = 8000;
+            long chunk = 9000;
             
             while (rem > 0)
             {
