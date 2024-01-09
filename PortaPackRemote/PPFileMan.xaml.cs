@@ -196,7 +196,7 @@ namespace PortaPackRemote
                 {
                     string dst = dlg.EnteredText;
                     Mouse.OverrideCursor = Cursors.Wait;
-                    await _api.UploadFile(src, dst, progressCallback);
+                    await _api.UploadFileBinary(src, dst, progressCallback, true);
                     Mouse.OverrideCursor = null;
                     Dispatcher.Invoke(() =>
                     {
@@ -220,7 +220,7 @@ namespace PortaPackRemote
             if (MessageBox.Show("Are you sure you want to flash this image: " + sel, "Flash", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
                 await _api.SendFlash(currPath + sel);
-                //Close(); //flashing will reset serial too
+                Close(); //flashing will reset serial too
             }
             
         }

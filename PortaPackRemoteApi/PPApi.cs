@@ -22,6 +22,7 @@ namespace PortaPackRemoteApi
 
         public event EventHandler<string>? OnLine;
         private readonly ManualResetEventSlim lineEvent = new ManualResetEventSlim(false);
+        public event EventHandler<byte[]>? OnRawBytes;
 
         private string dataInBuffer = "";
         private List<string> lastLines = new List<string>();
@@ -57,7 +58,7 @@ namespace PortaPackRemoteApi
             _serialPort.Parity = Parity.None;
             _serialPort.StopBits = StopBits.One;
             _serialPort.DataBits = 8;
-            _serialPort.WriteTimeout = 1000;
+            _serialPort.WriteTimeout = 3000;
             _serialPort.NewLine = "\r\n"; // Set your newline character
             _serialPort.ErrorReceived += _serialPort_ErrorReceived;
             _serialPort.DataReceived += _serialPort_DataReceived;
@@ -77,7 +78,7 @@ namespace PortaPackRemoteApi
         {
             if (_serialPort == null) return;
             int bytes = _serialPort.BytesToRead;
-            sentcommandRn = false;
+            sentcommandRn = false; //to prevent pp crash
             if (bytes <=0)
             {
                 OnSerialError();
@@ -85,7 +86,7 @@ namespace PortaPackRemoteApi
 
             byte[] buffer = new byte[bytes];
             _serialPort.Read(buffer, 0, bytes);
-            string sajt = Encoding.UTF8.GetString(buffer, 0, bytes );
+            string sajt = Encoding.UTF8.GetString(buffer, 0, bytes);
             dataInBuffer += sajt;
             
             int o = dataInBuffer.IndexOf("\r\n");
@@ -96,7 +97,7 @@ namespace PortaPackRemoteApi
                 dataInBuffer = dataInBuffer.Remove(0,o + 2);
                 o = dataInBuffer.IndexOf("\r\n");
             }
-            if (dataInBuffer == PROMPT)
+            if (dataInBuffer == PROMPT) //bc it has no line ending, we must send it too
             {
                 dataInBuffer = "";
                 OnLineReceived(PROMPT);
@@ -194,7 +195,11 @@ namespace PortaPackRemoteApi
         public bool WriteSerial(string line) 
         {
             Trace.WriteLine(">" + line);
-            if (sentcommandRn || isWaitingForReply) return false;
+            if (sentcommandRn || isWaitingForReply)
+            {
+                Trace.WriteLine("SEND COND FAILED");
+                return false;
+            }
             try
             {
                 if (_serialPort == null || !_serialPort.IsOpen)
@@ -205,7 +210,7 @@ namespace PortaPackRemoteApi
                 {
                     line = line + "\n\r";
                 }
-                _serialPort.DiscardInBuffer();
+                //_serialPort.DiscardInBuffer();
                 _serialPort.BaseStream.Flush();
                 int chunkSize = 32;
                 // Send data in chunks
@@ -217,8 +222,9 @@ namespace PortaPackRemoteApi
                     _serialPort.Write(byteArray, 0, byteArray.Length);
                     // Flush the serial port
                     _serialPort.BaseStream.Flush();
+                    Thread.Sleep(7);
                 }
-                sentcommandRn = true;
+                //sentcommandRn = true;
                 return true;
             }
             catch (Exception ex) { 
@@ -237,17 +243,17 @@ namespace PortaPackRemoteApi
                 }
                 
                 _serialPort.BaseStream.Flush();
-                int chunkSize = 30;
+                int chunkSize = 64;
                 // Send data in chunks
                 for (int i = 0; i < data.Length; i += chunkSize)
                 {
                     int remainingBytes = Math.Min(chunkSize, data.Length - i);
-                    await Task.Delay(10);
+                    await Task.Delay(7);
                     _serialPort.BaseStream.Write(data, i, remainingBytes);
                     _serialPort.BaseStream.Flush();
                     Trace.WriteLine(i.ToString());
                 }
-                sentcommandRn = true;
+                //sentcommandRn = true;
                 return true;
             }
             catch (Exception ex)
@@ -466,6 +472,7 @@ namespace PortaPackRemoteApi
             sFile.Position = 0;
             long rem = size;
             long chunk = 20;//max size 20 char-> 10 byte
+            int trycount = 0;
             while (rem > 0)
             {
                 if (rem < chunk) { chunk = rem; }
@@ -475,8 +482,14 @@ namespace PortaPackRemoteApi
 
                 WriteSerial("fwrite " + toWrite);
                 lines = await ReadStringsAsync(PROMPT);
+                if (lines.Count<1)
+                {
+                    Trace.WriteLine("No response");
+                    trycount++;
+                    if (trycount>5) throw new Exception("Error uploading (retry) file");
+                    continue;
+                }
                 var o = lines.Last();
-
                 if (o != "ok")
                 {
                     WriteSerial("close");
@@ -485,6 +498,7 @@ namespace PortaPackRemoteApi
                     throw new Exception("Error uploading (data) file");
                 }
                 rem -= chunk;
+                trycount = 0;
                 onProgress?.Invoke((int)((float)(size - rem) / (float)size * 100));
             }
             sFile.Close();
@@ -524,7 +538,8 @@ namespace PortaPackRemoteApi
             var sFile = File.OpenRead(src);
             sFile.Position = 0;
             long rem = size;
-            long chunk = 100;
+            long chunk = 6000;
+            
             /*
              byte[] byteArray = Enumerable.Repeat<byte>((byte)i, 300).ToArray<byte>();
                 WriteSerial("fwb 300");
