@@ -190,7 +190,7 @@ namespace PortaPackRemote
                 
                 string src = openFileDialog.FileName;
                 string srcBase = Path.GetFileName(src);
-                var dlg = new TextInputDialog(currPath + srcBase, "Uploaded file name");
+                var dlg = new TextInputDialog(currPath + srcBase, "Uploaded file name", "Enter file name");
                 var res = dlg.ShowDialog();
                 if (res != null && res == true)
                 {

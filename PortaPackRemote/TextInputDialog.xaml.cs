@@ -21,12 +21,13 @@ namespace PortaPackRemote
     {
         public string EnteredText { get; private set; }
 
-        public TextInputDialog(string defaultText, string labelText)
+        public TextInputDialog(string defaultText, string labelText, string titleText)
         {
             InitializeComponent();
             EnteredText = defaultText;
             txtText.Text = defaultText;
             lblFT.Content = labelText;
+            this.Title = titleText;
         }
 
         private void btnOk_Click(object sender, RoutedEventArgs e)

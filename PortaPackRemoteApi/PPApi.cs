@@ -1,7 +1,5 @@
-﻿using System.Collections;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.IO.Ports;
 using System.Text;
 
@@ -9,6 +7,8 @@ namespace PortaPackRemoteApi
 {
     public class PPApi
     {
+        private static int SendChunkMax = 300;
+
         static string PROMPT = "ch> ";
          ~PPApi() { Close(); }
 
@@ -212,7 +212,7 @@ namespace PortaPackRemoteApi
                 }
                 //_serialPort.DiscardInBuffer();
                 _serialPort.BaseStream.Flush();
-                int chunkSize = 32;
+                int chunkSize = SendChunkMax;
                 // Send data in chunks
                 for (int i = 0; i < line.Length; i += chunkSize)
                 {
@@ -242,7 +242,7 @@ namespace PortaPackRemoteApi
                 }
                 
                 _serialPort.BaseStream.Flush();
-                int chunkSize = 300;
+                int chunkSize = SendChunkMax;
                 // Send data in chunks
                 for (int i = 0; i < data.Length; i += chunkSize)
                 {
@@ -538,16 +538,8 @@ namespace PortaPackRemoteApi
             var sFile = File.OpenRead(src);
             sFile.Position = 0;
             long rem = size;
-            long chunk = 6000;
+            long chunk = 8000;
             
-            /*
-             byte[] byteArray = Enumerable.Repeat<byte>((byte)i, 300).ToArray<byte>();
-                WriteSerial("fwb 300");
-                await ReadStringsAsync("send");
-                WriteSerialBinary(byteArray);
-                Trace.WriteLine(i.ToString());
-                await ReadStringsAsync(PROMPT);
-            */
             while (rem > 0)
             {
                 if (rem < chunk) { chunk = rem; }
